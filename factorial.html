@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+    <button class="nav-toggle" aria-label="toggle navigation">☰</button>
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+    </ul>
+</nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <div class="breadcrumb">
+                <span>Numbers & Operations</span> / <span>Factorials</span>
+            </div>
+
+            <h2>Factorials</h2>
+                <p>A factorial of a number <code>n</code> (written <code>n!</code>) is the product of all positive integers from 1 to <code>n</code>.</p>
+                <p><code>n! = n × (n-1) × (n-2) × ... × 1</code></p>
+                <p>Also, <code>0! = 1</code> and <code>1! = 1</code> by definition.</p>
+
+                <h3>Factorials from 2! to 10!</h3>
+                <table class="math-table">
+                    <thead>
+                        <tr><th>Expression</th><th>Calculation</th><th>Result</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>2!</td><td>2 × 1</td><td>2</td></tr>
+                        <tr><td>3!</td><td>3 × 2 × 1</td><td>6</td></tr>
+                        <tr><td>4!</td><td>4 × 3 × 2 × 1</td><td>24</td></tr>
+                        <tr><td>5!</td><td>5 × 4 × 3 × 2 × 1</td><td>120</td></tr>
+                        <tr><td>6!</td><td>6 × 5 × 4 × 3 × 2 × 1</td><td>720</td></tr>
+                        <tr><td>7!</td><td>7 × 6 × 5 × 4 × 3 × 2 × 1</td><td>5040</td></tr>
+                        <tr><td>8!</td><td>8 × 7 × 6 × 5 × 4 × 3 × 2 × 1</td><td>40320</td></tr>
+                        <tr><td>9!</td><td>9 × 8 × 7 × 6 × 5 × 4 × 3 × 2 × 1</td><td>362880</td></tr>
+                        <tr><td>10!</td><td>10 × 9 × 8 × 7 × 6 × 5 × 4 × 3 × 2 × 1</td><td>3628800</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="quiz" data-quiz="factorial">
+                    <h3>Quick Quiz</h3>
+                    <p>What is 5!?</p>
+                    <div class="options">
+                        <button data-answer="wrong">25</button>
+                        <button data-answer="wrong">60</button>
+                        <button data-answer="correct">120</button>
+                        <button data-answer="wrong">720</button>
+                    </div>
+                    <p class="feedback"></p>
+                </div>
+
+                <div class="exercise" id="factorial-exercise">
+                    <h3>Interactive Exercise: Factorials</h3>
+                    <p class="exercise-question"></p>
+                    <input type="number" class="exercise-input" placeholder="Enter your answer">
+                    <button class="exercise-submit">Check</button>
+                    <button class="exercise-next" style="display:none;">Next Question</button>
+                    <p class="exercise-feedback"></p>
+                    <p class="exercise-streak">Streak: 0</p>
+                </div>
+
+                <div class="visual-box">
+                    <h3>🧱 Factorial Blocks</h3>
+                    <p>Choose a number and see how many ways you can arrange blocks!</p>
+                    <input type="range" min="1" max="5" value="3" class="slider factorial-slider" id="factorial-slider">
+                    <p class="slider-value">n = <span id="factorial-n">3</span>, Blocks = <span id="factorial-blocks">6</span></p>
+                    <div class="blocks-container" id="factorial-blocks-visual"></div>
+                    <p id="factorial-scenario" class="visual-feedback">3 blocks can be arranged in 6 different ways!</p>
+                </div>
+
+                <div class="game-box">
+                    <h3>🐾 Mini Game: Animal Line-Up!</h3>
+                    <p>Shuffle the animals to see different arrangements. There are <strong id="animal-total">6</strong> possible ways!</p>
+                    <div class="animals-row" id="animals-row">
+                        <span class="animal">🐶</span>
+                        <span class="animal">🐱</span>
+                        <span class="animal">🐭</span>
+                    </div>
+                    <button class="game-button" id="shuffle-animals">🔀 Shuffle Animals</button>
+                    <p id="animal-message" class="game-feedback">You found arrangement #1!</p>
+                    <p class="game-score">Found: <span id="animal-found">1</span> / <span id="animal-max">6</span></p>
+                </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

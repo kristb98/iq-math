@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+    <button class="nav-toggle" aria-label="toggle navigation">☰</button>
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+    </ul>
+</nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <div class="breadcrumb">
+                <span>Exponents & Growth</span> / <span>Tetration</span>
+            </div>
+
+            <h2>Tetration</h2>
+<h3>What Is Tetration?</h3>
+                <p>Tetration is "powers stacked on top of powers." If powers are repeated multiplication, tetration is repeated exponentiation.</p>
+                <p><code><sup>3</sup>2</code> means a tower of three 2s: <code>2<sup>(2<sup>2</sup>)</sup> = 2<sup>4</sup> = 16</code>.</p>
+                <div class="example-grid">
+                    <div class="example-card"><code><sup>2</sup>2 = 2<sup>2</sup> = 4</code></div>
+                    <div class="example-card"><code><sup>3</sup>2 = 2<sup>(2<sup>2</sup>)</sup> = 2<sup>4</sup> = 16</code></div>
+                    <div class="example-card"><code><sup>2</sup>3 = 3<sup>3</sup> = 27</code></div>
+                    <div class="example-card"><code><sup>3</sup>3 = 3<sup>(3<sup>3</sup>)</sup> = 3<sup>27</sup> = 7625597484987</code></div>
+                </div>
+
+                <div class="visual-box">
+                    <h3>🏗️ Tetration Tower</h3>
+                    <p>Build a tower of powers and see how fast it grows!</p>
+                    <div class="tower-controls">
+                        <label>Base: <input type="range" min="2" max="3" value="2" class="slider tower-slider" id="tower-base"></label>
+                        <label>Height: <input type="range" min="2" max="3" value="2" class="slider tower-slider" id="tower-height"></label>
+                    </div>
+                    <p class="slider-value">Tower value: <span id="tower-value">4</span></p>
+                    <div class="tower-display" id="tower-display"></div>
+                    <p id="tower-scenario" class="visual-feedback">A tower of height 2 is easy. Height 3 gets huge fast!</p>
+                </div>
+
+                <div class="quiz" data-quiz="tetration">
+                    <h3>Quick Quiz</h3>
+                    <p>What is <sup>3</sup>2 (2 tetrated to height 3)?</p>
+                    <div class="options">
+                        <button data-answer="wrong">4</button>
+                        <button data-answer="wrong">8</button>
+                        <button data-answer="correct">16</button>
+                        <button data-answer="wrong">32</button>
+                    </div>
+                    <p class="feedback"></p>
+                </div>
+
+                <div class="exercise" id="tetration-exercise">
+                    <h3>Interactive Exercise: Tetration</h3>
+                    <p class="exercise-question"></p>
+                    <input type="number" class="exercise-input" placeholder="Enter your answer">
+                    <button class="exercise-submit">Check</button>
+                    <button class="exercise-next" style="display:none;">Next Question</button>
+                    <p class="exercise-feedback"></p>
+                    <p class="exercise-streak">Streak: 0</p>
+                </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

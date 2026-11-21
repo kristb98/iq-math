@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+    <button class="nav-toggle" aria-label="toggle navigation">☰</button>
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+    </ul>
+</nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <div class="breadcrumb">
+                <span>Physics & Dimensions</span> / <span>E=mc²</span>
+            </div>
+
+            <h2>Einstein's Most Famous Equation</h2>
+                <p class="equation">E = mc²</p>
+                <p>This equation tells us that <strong>mass and energy are interchangeable</strong>.</p>
+                <ul>
+                    <li><strong>E</strong> = energy</li>
+                    <li><strong>m</strong> = mass</li>
+                    <li><strong>c</strong> = speed of light in a vacuum (≈ 299,792,458 m/s)</li>
+                </ul>
+                <p>Because <code>c²</code> is enormous, even a tiny amount of mass can be converted into a huge amount of energy.</p>
+
+                <div class="highlight-box">
+                    <h3>Example</h3>
+                    <p>If <code>m = 1 kg</code>, then:</p>
+                    <p><code>E = 1 × (299,792,458)² ≈ 8.99 × 10<sup>16</sup> joules</code></p>
+                </div>
+
+                <div class="quiz" data-quiz="emc2">
+                    <h3>Quick Quiz</h3>
+                    <p>What does the "c" in E = mc² represent?</p>
+                    <div class="options">
+                        <button data-answer="wrong">Calories</button>
+                        <button data-answer="correct">Speed of light</button>
+                        <button data-answer="wrong">Centigrade</button>
+                        <button data-answer="wrong">Constant mass</button>
+                    </div>
+                    <p class="feedback"></p>
+                </div>
+
+                <div class="exercise" id="energy-calculator">
+                    <h3>Interactive Exercise: Energy Calculator</h3>
+                    <p>Enter a mass in kilograms to see how much energy it equals using E = mc².</p>
+                    <input type="number" step="any" class="mass-input" placeholder="Mass in kg">
+                    <button class="calc-energy">Calculate Energy</button>
+                    <p class="energy-result"></p>
+                </div>
+
+                <div class="visual-box">
+                    <h3>💥 Energy Explosion Visualizer</h3>
+                    <p>Slide the mass and watch the energy bubble grow!</p>
+                    <input type="range" min="0" max="10" value="1" step="0.1" class="slider energy-slider" id="energy-slider">
+                    <p class="slider-value">Mass: <span id="energy-mass">1</span> kg</p>
+                    <div class="energy-scene">
+                        <div class="energy-bubble" id="energy-bubble"></div>
+                        <div class="energy-label" id="energy-label">E ≈ 9.0 × 10¹⁶ J</div>
+                    </div>
+                    <p id="energy-scenario" class="visual-feedback">That's enough energy to power a city for a long time!</p>
+                </div>
+
+                <div class="game-box">
+                    <h3>💡 Mini Game: Light the City!</h3>
+                    <p>Slide the mass to light up houses. Can you light them all?</p>
+                    <input type="range" min="0" max="10" value="0" step="0.5" class="slider city-slider" id="city-slider">
+                    <p class="slider-value">Mass: <span id="city-mass">0</span> kg</p>
+                    <div class="city-grid" id="city-grid"></div>
+                    <p id="city-message" class="game-feedback">No houses lit yet. Try adding mass!</p>
+                    <p class="game-score">Houses lit: <span id="city-lit">0</span> / 10</p>
+                </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

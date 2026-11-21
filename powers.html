@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+    <button class="nav-toggle" aria-label="toggle navigation">☰</button>
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+    </ul>
+</nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <div class="breadcrumb">
+                <span>Exponents & Growth</span> / <span>Powers</span>
+            </div>
+
+            <h2>Powers</h2>
+<h3>What Are Powers?</h3>
+                <p>A power is a shortcut for repeated multiplication. The <strong>base</strong> is the number being multiplied, and the <strong>exponent</strong> tells how many times to multiply it.</p>
+                <p><code>2<sup>3</sup></code> means "multiply 2 by itself 3 times": <code>2 × 2 × 2 = 8</code>.</p>
+                <div class="example-grid">
+                    <div class="example-card"><code>2<sup>3</sup> = 2 × 2 × 2 = 8</code></div>
+                    <div class="example-card"><code>3<sup>2</sup> = 3 × 3 = 9</code></div>
+                    <div class="example-card"><code>5<sup>3</sup> = 5 × 5 × 5 = 125</code></div>
+                    <div class="example-card"><code>10<sup>4</sup> = 10 × 10 × 10 × 10 = 10000</code></div>
+                </div>
+
+                <div class="visual-box">
+                    <h3>🔲 Power Grid Builder</h3>
+                    <p>Pick a base and height to build a grid of dots!</p>
+                    <div class="power-controls">
+                        <label>Base: <input type="range" min="2" max="6" value="2" class="slider power-slider" id="power-base"></label>
+                        <label>Exponent: <input type="range" min="2" max="4" value="3" class="slider power-slider" id="power-exp"></label>
+                    </div>
+                    <p class="slider-value"><span id="power-equation">2<sup>3</sup></span> = <span id="power-total">8</span></p>
+                    <div class="power-grid" id="power-grid"></div>
+                    <p id="power-scenario" class="visual-feedback">2 groups of 2 groups of 2 = 8 dots!</p>
+                </div>
+
+                <div class="game-box">
+                    <h3>🃏 Mini Game: Power Match!</h3>
+                    <p>Click cards to match powers with their values!</p>
+                    <div class="match-grid" id="match-grid"></div>
+                    <p id="match-message" class="game-feedback">Find all the matches!</p>
+                    <p class="game-score">Matches: <span id="match-score">0</span> / 4</p>
+                </div>
+
+                <div class="quiz" data-quiz="powers">
+                    <h3>Quick Quiz</h3>
+                    <p>What is 2<sup>3</sup>?</p>
+                    <div class="options">
+                        <button data-answer="wrong">6</button>
+                        <button data-answer="correct">8</button>
+                        <button data-answer="wrong">9</button>
+                        <button data-answer="wrong">16</button>
+                    </div>
+                    <p class="feedback"></p>
+                </div>
+
+                <div class="exercise" id="power-exercise">
+                    <h3>Interactive Exercise: Powers</h3>
+                    <p class="exercise-question"></p>
+                    <input type="number" class="exercise-input" placeholder="Enter your answer">
+                    <button class="exercise-submit">Check</button>
+                    <button class="exercise-next" style="display:none;">Next Question</button>
+                    <p class="exercise-feedback"></p>
+                    <p class="exercise-streak">Streak: 0</p>
+                </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

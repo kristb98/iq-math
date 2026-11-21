@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+    <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+    <button class="nav-toggle" aria-label="toggle navigation">☰</button>
+    <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+    </ul>
+</nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <div class="breadcrumb">
+                <span>Exponents & Growth</span> / <span>Logarithms</span>
+            </div>
+
+            <h2>Logarithms</h2>
+                <p>A logarithm answers the question: <strong>"To what power must we raise the base to get this number?"</strong></p>
+                <p>If <code>log<sub>b</sub>(x) = y</code>, then <code>b<sup>y</sup> = x</code>.</p>
+                <p>When no base is written, <strong>log</strong> usually means base 10.</p>
+
+                <div class="highlight-box">
+                    <h3>Focus: LOG(80)</h3>
+                    <p><code>log(80)</code> asks: "10 raised to what power equals 80?"</p>
+                    <p class="big-result">log(80) ≈ 1.9</p>
+                    <p>Check: <code>10<sup>1.9</sup> ≈ 80</code></p>
+                </div>
+
+                <div class="visual-box">
+                    <h3>🎯 Log Explorer</h3>
+                    <p>Move the slider to find where <code>10<sup>x</sup> = 80</code>!</p>
+                    <input type="range" min="10" max="20" value="19" class="slider log-slider" id="log-slider">
+                    <div class="log-display">
+                        <p>Power: <span id="log-power">1.9</span></p>
+                        <p>10<sup id="log-sup">1.9</sup> = <span id="log-result">79.43</span></p>
+                        <div class="target-line">
+                            <span>🎯 Target: 80</span>
+                        </div>
+                    </div>
+                    <div class="number-line" id="log-number-line">
+                        <div class="number-line-bar"></div>
+                        <div class="number-line-marker" id="log-marker"></div>
+                        <div class="number-line-labels">
+                            <span>10</span>
+                            <span>100</span>
+                        </div>
+                    </div>
+                    <p id="log-message" class="visual-feedback">Getting close to 80!</p>
+                </div>
+
+                <div class="game-box">
+                    <h3>🚀 Mini Game: Rocket to 80!</h3>
+                    <p>Slide the power to launch the rocket. Land exactly on 80!</p>
+                    <input type="range" min="10" max="20" value="15" class="slider rocket-slider" id="rocket-slider">
+                    <div class="rocket-track">
+                        <div class="rocket" id="rocket">🚀</div>
+                        <div class="rocket-target">🎯 80</div>
+                    </div>
+                    <p>Power: <span id="rocket-power">1.5</span> → Height: <span id="rocket-height">31.62</span></p>
+                    <button class="game-button" id="rocket-launch">Launch!</button>
+                    <p id="rocket-message" class="game-feedback">Set your power and launch!</p>
+                </div>
+
+                <div class="quiz" data-quiz="log">
+                    <h3>Quick Quiz</h3>
+                    <p>What is log(80) approximately?</p>
+                    <div class="options">
+                        <button data-answer="wrong">1.8</button>
+                        <button data-answer="correct">1.9</button>
+                        <button data-answer="wrong">2.0</button>
+                        <button data-answer="wrong">2.1</button>
+                    </div>
+                    <p class="feedback"></p>
+                </div>
+
+                <div class="exercise" id="log-exercise">
+                    <h3>Interactive Exercise: Log(80)</h3>
+                    <p>Type log(80) rounded to 1 decimal place.</p>
+                    <p class="exercise-question">What is log(80) approximately?</p>
+                    <input type="number" step="0.1" class="exercise-input" placeholder="Enter your answer">
+                    <button class="exercise-submit">Check</button>
+                    <button class="exercise-next" style="display:none;">Try Again</button>
+                    <p class="exercise-feedback"></p>
+                </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
