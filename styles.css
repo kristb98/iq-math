@@ -1309,26 +1309,317 @@ code {
     color: var(--white);
 }
 
+/* Mixed test */
+.test-intro {
+    max-width: 720px;
+    margin-bottom: 1.5rem;
+    color: var(--text-light);
+}
+
+.test {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    border-top: 5px solid var(--primary);
+}
+
+.test-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+}
+
+.test-question {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 1.5rem;
+}
+
+.test-question sup {
+    font-size: 1rem;
+}
+
+.test-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    font-size: 1.3rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.test-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.test-submit,
+.test-next,
+.test-restart {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: var(--white);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.test-submit:hover,
+.test-next:hover,
+.test-restart:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.test-submit:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+}
+
+.test-feedback {
+    margin-top: 1rem;
+    min-height: 1.6rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.test-feedback.correct {
+    color: var(--correct);
+}
+
+.test-feedback.wrong {
+    color: var(--wrong);
+}
+
+.test-result {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+.test-result h3 {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+}
+
+.test-final-score {
+    font-size: 1.2rem;
+}
+
+.test-percentage {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1.2;
+    margin: 0.5rem 0 1.5rem;
+}
+
+.test-result-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.test-home {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    background: #64748b;
+    color: var(--white);
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.test-home:hover {
+    background: #475569;
+    transform: translateY(-1px);
+}
+
+.test-history {
+    text-align: left;
+    border-top: 2px solid var(--bg-alt);
+    padding-top: 1.5rem;
+}
+
+.test-history h4 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.test-history-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.test-history-item {
+    display: grid;
+    grid-template-columns: 1.4fr 0.7fr 0.7fr 1.6fr;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    background: var(--bg);
+    font-size: 0.95rem;
+}
+
+.test-history-item.latest {
+    background: #eff6ff;
+    border-left: 4px solid var(--primary);
+}
+
+.history-label {
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.history-percent {
+    font-weight: 900;
+}
+
+.history-score {
+    color: var(--text-light);
+}
+
+.history-date {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    text-align: right;
+}
+
+.test-history-empty {
+    text-align: center;
+    color: var(--text-light);
+    padding: 0.75rem;
+}
+
+/* Big calculation box */
+.calc-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: var(--shadow);
+    border-top: 5px solid var(--accent);
+}
+
+.calc-box h3 {
+    margin-top: 0;
+}
+
+.calc-hint {
+    color: var(--text-light);
+    margin-bottom: 1.25rem;
+}
+
+.calc-tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(62px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.calc-tools button {
+    padding: 0.75rem 0.25rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.calc-tools button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: #eff6ff;
+}
+
+.calc-input {
+    width: 100%;
+    min-height: 180px;
+    resize: vertical;
+    padding: 1.25rem;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 1.5rem;
+    line-height: 1.5;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+}
+
+.calc-input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.calc-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.calc-evaluate,
+.calc-clear {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: var(--white);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.calc-clear {
+    background: #64748b;
+}
+
+.calc-evaluate:hover {
+    background: var(--primary-dark);
+}
+
+.calc-clear:hover {
+    background: #475569;
+}
+
+.calc-result {
+    margin-top: 1rem;
+    min-height: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    word-break: break-word;
+}
+
+.calc-result.correct {
+    color: var(--correct);
+}
+
+.calc-result.wrong {
+    color: var(--wrong);
+    font-size: 1.1rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
-    .nav-toggle {
-        display: block;
+    .navbar {
+        padding: 0.85rem 1rem;
     }
 
     .nav-links {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: var(--primary-dark);
-        padding: 1rem 2rem;
         gap: 1rem;
-    }
-
-    .nav-links.active {
-        display: flex;
     }
 
     .hero h1 {
@@ -1341,5 +1632,32 @@ code {
 
     .equation {
         font-size: 2rem;
+    }
+
+    .test,
+    .calc-box {
+        padding: 1.25rem;
+    }
+
+    .test-question {
+        font-size: 1.3rem;
+    }
+
+    .test-percentage {
+        font-size: 2.75rem;
+    }
+
+    .test-history-item {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.25rem 0.5rem;
+    }
+
+    .history-date {
+        text-align: left;
+    }
+
+    .calc-input {
+        font-size: 1.2rem;
+        min-height: 150px;
     }
 }

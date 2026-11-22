@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math - Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <h2>Mixed Test</h2>
+            <p class="test-intro">15 questions covering every topic. A brand-new random set is generated on every attempt, and no explanations are shown.</p>
+
+            <div class="test" id="mixed-test">
+                <div class="test-active">
+                    <div class="test-status">
+                        <span class="test-progress">Question 1 / 15</span>
+                        <span class="test-score">Correct: 0</span>
+                    </div>
+                    <p class="test-question"></p>
+                    <input type="text" class="test-input" placeholder="Your answer" autocomplete="off">
+                    <button class="test-submit">Submit Answer</button>
+                    <button class="test-next" style="display:none;">Next Question</button>
+                    <p class="test-feedback"></p>
+                </div>
+
+                <div class="test-result" style="display:none;">
+                    <h3>Test Complete</h3>
+                    <p class="test-final-score"></p>
+                    <p class="test-percentage"></p>
+                    <div class="test-result-actions">
+                        <button class="test-restart">New Random Test</button>
+                        <a href="index.html" class="test-home">Home</a>
+                    </div>
+                    <div class="test-history">
+                        <h4>Test History</h4>
+                        <ol class="test-history-list"></ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="calc-box" id="calc-box">
+                <h3>🧮 Calculation Box</h3>
+                <p class="calc-hint">A big workspace for your math. Type an expression or tap the buttons, then press Calculate.</p>
+                <div class="calc-tools">
+                    <button data-insert="7">7</button>
+                    <button data-insert="8">8</button>
+                    <button data-insert="9">9</button>
+                    <button data-insert="/">÷</button>
+                    <button data-insert="4">4</button>
+                    <button data-insert="5">5</button>
+                    <button data-insert="6">6</button>
+                    <button data-insert="*">×</button>
+                    <button data-insert="1">1</button>
+                    <button data-insert="2">2</button>
+                    <button data-insert="3">3</button>
+                    <button data-insert="-">−</button>
+                    <button data-insert="0">0</button>
+                    <button data-insert=".">.</button>
+                    <button data-insert="(">(</button>
+                    <button data-insert=")">)</button>
+                    <button data-insert="+">+</button>
+                    <button data-insert="^">^</button>
+                    <button data-insert="sqrt(">√(</button>
+                    <button data-insert="cbrt(">∛(</button>
+                    <button data-insert="!">!</button>
+                </div>
+                <textarea class="calc-input" spellcheck="false" placeholder="Example: sqrt(144) + 5! * 2"></textarea>
+                <div class="calc-actions">
+                    <button class="calc-evaluate">Calculate</button>
+                    <button class="calc-clear">Clear</button>
+                </div>
+                <p class="calc-result"></p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

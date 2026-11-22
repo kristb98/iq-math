@@ -1,23 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Dynamic navigation with category dropdowns
+    // Highlight the current page in the top bar
     buildNavigation();
-
-    // Mobile navigation toggle
-    const navToggle = document.querySelector('.nav-toggle');
-    const navLinks = document.querySelector('.nav-links');
-
-    if (navToggle && navLinks) {
-        navToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
-
-        // Close mobile menu when a link is clicked
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-            });
-        });
-    }
 
     // Generate perfect square roots table (0-500, no decimals)
     const sqrtBody = document.getElementById('sqrt-body');
@@ -172,6 +155,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 11. Speed Challenge: mixed questions
     initSpeedChallenge();
+
+    // 12. Full mixed test + calculation box
+    initMixedTest();
+    initCalcBox();
 });
 
 function randInt(min, max) {
@@ -1023,96 +1010,14 @@ function initTesseractGame() {
     });
 }
 
-const NAV_DATA = {
-    categories: [
-        {
-            name: 'Numbers & Operations',
-            emoji: '🔢',
-            topics: [
-                { id: 'factorial', name: 'Factorials' },
-                { id: 'sqrt', name: 'Square Roots' },
-                { id: 'cbrt', name: 'Cube Roots' }
-            ]
-        },
-        {
-            name: 'Exponents & Growth',
-            emoji: '⚡',
-            topics: [
-                { id: 'powers', name: 'Powers' },
-                { id: 'tetration', name: 'Tetration' },
-                { id: 'pentation', name: 'Pentation' },
-                { id: 'hexation', name: 'Hexation' },
-                { id: 'log', name: 'Logarithms' }
-            ]
-        },
-        {
-            name: 'Physics & Dimensions',
-            emoji: '🌌',
-            topics: [
-                { id: 'emc2', name: 'E=mc²' },
-                { id: 'tesseract', name: 'Tesseract' }
-            ]
-        }
-    ]
-};
-
 function buildNavigation() {
-    const navLinks = document.querySelector('.nav-links');
-    if (!navLinks) return;
-
+    // The top bar only contains the brand, Home and Test (defined in each page's HTML).
+    // Here we just mark whichever link matches the current page.
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
-    navLinks.innerHTML = '';
-
-    // Home link
-    const homeLi = document.createElement('li');
-    const homeLink = document.createElement('a');
-    homeLink.href = 'index.html';
-    homeLink.textContent = 'Home';
-    if (currentPage === 'index.html' || currentPage === '') homeLink.classList.add('active');
-    homeLi.appendChild(homeLink);
-    navLinks.appendChild(homeLi);
-
-    // Category dropdowns
-    NAV_DATA.categories.forEach(category => {
-        const li = document.createElement('li');
-        li.className = 'nav-dropdown';
-
-        const btn = document.createElement('button');
-        btn.className = 'nav-dropdown-btn';
-        btn.innerHTML = `${category.emoji} ${category.name} <span class="dropdown-arrow">▾</span>`;
-
-        const dropdown = document.createElement('div');
-        dropdown.className = 'dropdown-menu';
-
-        category.topics.forEach(topic => {
-            const a = document.createElement('a');
-            a.href = `${topic.id}.html`;
-            a.textContent = topic.name;
-            if (currentPage === `${topic.id}.html`) a.classList.add('active');
-            dropdown.appendChild(a);
-        });
-
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // Close all other dropdowns
-            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                if (menu !== dropdown) menu.classList.remove('show');
-            });
-            dropdown.classList.toggle('show');
-        });
-
-        li.appendChild(btn);
-        li.appendChild(dropdown);
-        navLinks.appendChild(li);
-    });
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.nav-dropdown')) {
-            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                menu.classList.remove('show');
-            });
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        const linkPage = link.getAttribute('href');
+        if (linkPage === currentPage || (currentPage === '' && linkPage === 'index.html')) {
+            link.classList.add('active');
         }
     });
 }
@@ -1223,4 +1128,405 @@ function initSpeedChallenge() {
     nextBtn.addEventListener('click', nextQuestion);
 
     nextQuestion();
+}
+
+// ---------------- FULL MIXED TEST ----------------
+
+const TEST_QUESTION_GENERATORS = [
+    // 1. Factorials
+    () => {
+        const n = randInt(2, 9);
+        let answer = 1;
+        for (let i = 2; i <= n; i++) answer *= i;
+        return { question: `Calculate ${n}!`, answer: answer };
+    },
+    // 2. Square roots
+    () => {
+        const root = randInt(1, 22);
+        return { question: `What is √${root * root}?`, answer: root };
+    },
+    // 3. Cube roots
+    () => {
+        const root = randInt(1, 7);
+        return { question: `What is ∛${root * root * root}?`, answer: root };
+    },
+    // 4. Powers
+    () => {
+        const base = randInt(2, 9);
+        const exp = randInt(2, 4);
+        return { question: `Calculate ${base}<sup>${exp}</sup>`, answer: Math.pow(base, exp) };
+    },
+    // 5. Tetration
+    () => {
+        const options = [
+            { question: 'Calculate <sup>2</sup>2 (2 tetrated to height 2)', answer: 4 },
+            { question: 'Calculate <sup>3</sup>2 (2 tetrated to height 3)', answer: 16 },
+            { question: 'Calculate <sup>2</sup>3 (3 tetrated to height 2)', answer: 27 }
+        ];
+        return randChoice(options);
+    },
+    // 6. Pentation
+    () => {
+        const options = [
+            { question: 'What is 2 ↑↑↑ 2?', answer: 4 },
+            { question: 'What is 2 ↑↑↑ 3?', answer: 65536 }
+        ];
+        return randChoice(options);
+    },
+    // 7. Hexation
+    () => {
+        const options = [
+            { question: 'What is 2 ↑↑↑↑ 2?', answer: 4 },
+            { question: 'How many up-arrows does hexation use?', answer: 4 }
+        ];
+        return randChoice(options);
+    },
+    // 8. Logarithms
+    () => {
+        const options = [
+            { question: 'What is log(80) rounded to 1 decimal place?', answer: 1.9, tolerance: 0.05 },
+            { question: 'What is log(10)?', answer: 1 },
+            { question: 'What is log(100)?', answer: 2 },
+            { question: 'What is log(1000)?', answer: 3 }
+        ];
+        return randChoice(options);
+    },
+    // 9. E=mc²
+    () => {
+        const options = [
+            { question: 'In E = mc², what is the exponent on c?', answer: 2 },
+            { question: 'For m = 2 kg, E ≈ 18 × 10¹⁶ J. What is the coefficient?', answer: 18 },
+            { question: 'For m = 5 kg, E ≈ 45 × 10¹⁶ J. What is the coefficient?', answer: 45 }
+        ];
+        return randChoice(options);
+    },
+    // 10. Tesseract
+    () => {
+        const facts = [
+            { question: 'How many vertices does a tesseract have?', answer: 16 },
+            { question: 'How many edges does a tesseract have?', answer: 32 },
+            { question: 'How many square faces does a tesseract have?', answer: 24 },
+            { question: 'How many cubic cells does a tesseract have?', answer: 8 }
+        ];
+        return randChoice(facts);
+    }
+];
+
+function shuffleQuestions(questions) {
+    const copy = questions.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = randInt(0, i);
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+function buildTestQuestions() {
+    // One question from every topic, plus 5 extra random ones, all shuffled.
+    const questions = TEST_QUESTION_GENERATORS.map(generator => generator());
+    for (let i = 0; i < 5; i++) {
+        questions.push(randChoice(TEST_QUESTION_GENERATORS)());
+    }
+    return shuffleQuestions(questions);
+}
+
+const TEST_HISTORY_KEY = 'iqMathTestHistory';
+
+function readTestHistory() {
+    try {
+        const raw = localStorage.getItem(TEST_HISTORY_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveTestResult(score, total, percent) {
+    const history = readTestHistory();
+    history.unshift({ score: score, total: total, percent: percent, date: new Date().toISOString() });
+    const trimmed = history.slice(0, 10);
+    try {
+        localStorage.setItem(TEST_HISTORY_KEY, JSON.stringify(trimmed));
+    } catch (error) {
+        // Storage can be unavailable in some private browsing modes; history still shows this session.
+    }
+    return trimmed;
+}
+
+function formatHistoryDate(value) {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return '';
+    try {
+        return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    } catch (error) {
+        return date.toLocaleString();
+    }
+}
+
+function renderTestHistory(listEl, history) {
+    if (!listEl) return;
+    listEl.innerHTML = '';
+    if (!history.length) {
+        const empty = document.createElement('li');
+        empty.className = 'test-history-empty';
+        empty.textContent = 'No attempts recorded yet.';
+        listEl.appendChild(empty);
+        return;
+    }
+
+    history.forEach((entry, i) => {
+        const item = document.createElement('li');
+        item.className = 'test-history-item' + (i === 0 ? ' latest' : '');
+        const label = i === 0 ? 'Last time' : `${i + 1} attempts ago`;
+        const percent = typeof entry.percent === 'number' ? `${entry.percent}%` : '—';
+        const score = `${entry.score}/${entry.total}`;
+        item.innerHTML = `<span class="history-label">${label}</span><span class="history-percent">${percent}</span><span class="history-score">${score}</span><span class="history-date">${formatHistoryDate(entry.date)}</span>`;
+        listEl.appendChild(item);
+    });
+}
+
+function initMixedTest() {
+    const container = document.getElementById('mixed-test');
+    if (!container) return;
+
+    const activeArea = container.querySelector('.test-active');
+    const questionEl = container.querySelector('.test-question');
+    const inputEl = container.querySelector('.test-input');
+    const submitBtn = container.querySelector('.test-submit');
+    const nextBtn = container.querySelector('.test-next');
+    const feedbackEl = container.querySelector('.test-feedback');
+    const progressEl = container.querySelector('.test-progress');
+    const scoreEl = container.querySelector('.test-score');
+    const resultEl = container.querySelector('.test-result');
+    const finalScoreEl = container.querySelector('.test-final-score');
+    const percentageEl = container.querySelector('.test-percentage');
+    const restartBtn = container.querySelector('.test-restart');
+    const historyListEl = container.querySelector('.test-history-list');
+
+    let questions = [];
+    let index = 0;
+    let score = 0;
+
+    function showQuestion() {
+        questionEl.innerHTML = questions[index].question;
+        progressEl.textContent = `Question ${index + 1} / ${questions.length}`;
+        scoreEl.textContent = `Correct: ${score}`;
+        inputEl.value = '';
+        inputEl.disabled = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Answer';
+        nextBtn.style.display = 'none';
+        feedbackEl.textContent = '';
+        feedbackEl.className = 'test-feedback';
+        inputEl.focus();
+    }
+
+    function startTest() {
+        questions = buildTestQuestions();
+        index = 0;
+        score = 0;
+        resultEl.style.display = 'none';
+        activeArea.style.display = 'block';
+        showQuestion();
+    }
+
+    function check() {
+        const value = parseFloat(inputEl.value);
+        if (isNaN(value)) {
+            feedbackEl.textContent = 'Enter a number to answer.';
+            feedbackEl.className = 'test-feedback wrong';
+            return;
+        }
+
+        const current = questions[index];
+        const tolerance = current.tolerance || 0;
+        if (Math.abs(value - current.answer) <= tolerance) {
+            score++;
+            feedbackEl.textContent = '✅ Correct';
+            feedbackEl.className = 'test-feedback correct';
+        } else {
+            // No explanation and no correct answer is revealed.
+            feedbackEl.textContent = '❌ Incorrect';
+            feedbackEl.className = 'test-feedback wrong';
+        }
+
+        inputEl.disabled = true;
+        submitBtn.disabled = true;
+        scoreEl.textContent = `Correct: ${score}`;
+
+        if (index === questions.length - 1) {
+            const percent = Math.round((score / questions.length) * 100);
+            finalScoreEl.textContent = `${score} out of ${questions.length} correct`;
+            percentageEl.textContent = `${percent}%`;
+
+            // Reveal the result first; history is a bonus and must never block it.
+            activeArea.style.display = 'none';
+            resultEl.style.display = 'block';
+
+            try {
+                renderTestHistory(historyListEl, saveTestResult(score, questions.length, percent));
+            } catch (error) {
+                // If storage or history rendering fails, the result stays visible.
+            }
+        } else {
+            nextBtn.style.display = 'inline-block';
+            submitBtn.textContent = 'Answered';
+        }
+    }
+
+    submitBtn.addEventListener('click', check);
+    inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !submitBtn.disabled) check();
+    });
+    nextBtn.addEventListener('click', () => {
+        index++;
+        showQuestion();
+    });
+    restartBtn.addEventListener('click', startTest);
+
+    renderTestHistory(historyListEl, readTestHistory());
+    startTest();
+}
+
+// ---------------- BIG CALCULATION BOX ----------------
+
+function factorialValue(n) {
+    if (!Number.isInteger(n) || n < 0 || n > 170) {
+        throw new Error('Factorial needs a whole number from 0 to 170');
+    }
+    let result = 1;
+    for (let i = 2; i <= n; i++) result *= i;
+    return result;
+}
+
+function calculateExpression(expression) {
+    const cleaned = expression
+        .replace(/√/g, 'sqrt')
+        .replace(/∛/g, 'cbrt')
+        .replace(/×/g, '*')
+        .replace(/÷/g, '/')
+        .replace(/−/g, '-')
+        .replace(/\s+/g, '');
+
+    if (!cleaned) throw new Error('Type an expression to calculate');
+
+    const tokens = cleaned.match(/\d+(?:\.\d+)?|sqrt|cbrt|[+\-*/^%()!]/g) || [];
+    if (tokens.join('') !== cleaned) {
+        throw new Error('Use numbers and + - * / ^ % ( ) sqrt cbrt !');
+    }
+
+    let pos = 0;
+    const peek = () => tokens[pos];
+    const take = (value) => {
+        if (tokens[pos] === value) {
+            pos++;
+            return true;
+        }
+        return false;
+    };
+    const expect = (value, label) => {
+        if (!take(value)) throw new Error(`Missing ${label}`);
+    };
+
+    function parseExpression() {
+        let value = parseTerm();
+        while (peek() === '+' || peek() === '-') {
+            const op = tokens[pos++];
+            const right = parseTerm();
+            value = op === '+' ? value + right : value - right;
+        }
+        return value;
+    }
+
+    function parseTerm() {
+        let value = parsePower();
+        while (peek() === '*' || peek() === '/' || peek() === '%') {
+            const op = tokens[pos++];
+            const right = parsePower();
+            if (op === '*') value *= right;
+            else if (op === '/') value /= right;
+            else value %= right;
+        }
+        return value;
+    }
+
+    function parsePower() {
+        let value = parseFactor();
+        if (take('^')) value = Math.pow(value, parsePower());
+        return value;
+    }
+
+    function parseFactor() {
+        if (take('-')) return -parseFactor();
+        let value = parsePrimary();
+        while (take('!')) value = factorialValue(value);
+        return value;
+    }
+
+    function parsePrimary() {
+        if (take('(')) {
+            const value = parseExpression();
+            expect(')', ')');
+            return value;
+        }
+        if (peek() === 'sqrt' || peek() === 'cbrt') {
+            const fn = tokens[pos++];
+            expect('(', '(');
+            const value = parseExpression();
+            expect(')', ')');
+            return fn === 'sqrt' ? Math.sqrt(value) : Math.cbrt(value);
+        }
+        const token = peek();
+        if (token !== undefined && /^\d/.test(token)) {
+            pos++;
+            return parseFloat(token);
+        }
+        throw new Error('Invalid expression');
+    }
+
+    const result = parseExpression();
+    if (pos !== tokens.length) throw new Error('Invalid expression');
+    if (!Number.isFinite(result)) throw new Error('Result is too large or not a number');
+    return result;
+}
+
+function initCalcBox() {
+    const box = document.getElementById('calc-box');
+    if (!box) return;
+
+    const input = box.querySelector('.calc-input');
+    const resultEl = box.querySelector('.calc-result');
+    const evaluateBtn = box.querySelector('.calc-evaluate');
+    const clearBtn = box.querySelector('.calc-clear');
+
+    box.querySelectorAll('[data-insert]').forEach(button => {
+        button.addEventListener('click', () => {
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const insert = button.dataset.insert;
+            input.value = input.value.slice(0, start) + insert + input.value.slice(end);
+            const caret = start + insert.length;
+            input.focus();
+            input.setSelectionRange(caret, caret);
+        });
+    });
+
+    evaluateBtn.addEventListener('click', () => {
+        try {
+            const value = calculateExpression(input.value);
+            resultEl.textContent = '= ' + Number(value.toPrecision(12)).toLocaleString();
+            resultEl.className = 'calc-result correct';
+        } catch (error) {
+            resultEl.textContent = error.message;
+            resultEl.className = 'calc-result wrong';
+        }
+    });
+
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        resultEl.textContent = '';
+        resultEl.className = 'calc-result';
+        input.focus();
+    });
 }
