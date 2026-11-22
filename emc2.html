@@ -90,6 +90,37 @@
                     <p id="city-message" class="game-feedback">No houses lit yet. Try adding mass!</p>
                     <p class="game-score">Houses lit: <span id="city-lit">0</span> / 10</p>
                 </div>
+
+                <div class="game-box">
+                    <h3>🦸 Stickman Physics Lab</h3>
+                    <div class="stickman-hint">
+                        <div class="stickman" id="physics-stickman">
+                            <div class="s-head"></div>
+                            <div class="s-body"></div>
+                            <div class="s-arm s-left-arm"></div>
+                            <div class="s-arm s-right-arm"></div>
+                            <div class="s-leg s-left-leg"></div>
+                            <div class="s-leg s-right-leg"></div>
+                        </div>
+                        <p>Launch the stickman and use physics + math to hit the target!</p>
+                    </div>
+                    <p>Set angle and power. The stickman flies in a parabola. Land on the target!</p>
+                    <div class="lesson-note">
+                        <strong>Learn first:</strong> More power makes the stickman travel farther.
+                        A larger angle makes the stickman go higher. Change one slider at a time
+                        and watch the curved <strong>parabola</strong>.
+                    </div>
+                    <p class="formula-note"><code>horizontal distance ≈ power × cos(angle)</code></p>
+                    <div class="physics-controls">
+                        <label>Angle: <input type="range" min="15" max="75" value="45" class="slider physics-slider" id="physics-angle"><span id="angle-value">45°</span></label>
+                        <label>Power: <input type="range" min="10" max="30" value="20" class="slider physics-slider" id="physics-power"><span id="power-value">20</span></label>
+                    </div>
+                    <canvas id="physics-canvas" width="600" height="300" class="physics-canvas"></canvas>
+                    <button class="game-button" id="physics-launch">Launch Stickman!</button>
+                    <button class="game-button" id="physics-reset" style="display:none;">Try Again</button>
+                    <p id="physics-message" class="game-feedback">Hit the red target!</p>
+                    <p class="game-score">Score: <span id="physics-score">0</span></p>
+                </div>
         </div>
     </main>
 

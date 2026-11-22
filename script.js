@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Highlight the current page in the top bar
     buildNavigation();
+    enhanceGames();
 
     // Generate perfect square roots table (0-500, no decimals)
     const sqrtBody = document.getElementById('sqrt-body');
@@ -152,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSqrtGame();
     initCbrtGame();
     initTesseractGame();
+    initStickmanPhysicsLab();
 
     // 11. Speed Challenge: mixed questions
     initSpeedChallenge();
@@ -160,6 +162,48 @@ document.addEventListener('DOMContentLoaded', () => {
     initMixedTest();
     initCalcBox();
 });
+
+function enhanceGames() {
+    const hints = {
+        'Rocket to 80': 'Use power 1.9. The height should be close to 80.',
+        'Animal Line-Up': 'For 3 animals, start with one animal, then swap the other two.',
+        'Light the City': 'Each extra kilogram lights another house in this simple model.',
+        'Power Match': 'Read the exponent as repeated multiplication: 2³ means 2 × 2 × 2.',
+        'Build the Square': 'Ask: what number multiplied by itself gives the area?',
+        'Fill the Cube': 'Ask: what number multiplied by itself three times gives the volume?',
+        'Count the Parts': 'A tesseract has 16 vertices, 32 edges, 24 faces, and 8 cubic cells.',
+        'Stickman Physics Lab': 'Start with angle 45° and power 20. Change one slider, then watch the path.'
+    };
+
+    document.querySelectorAll('.game-box').forEach(game => {
+        const title = game.querySelector('h3')?.textContent || '';
+        const key = Object.keys(hints).find(name => title.includes(name));
+        if (!key || game.querySelector('.game-flow')) return;
+
+        const flow = document.createElement('div');
+        flow.className = 'game-flow';
+        flow.innerHTML = '<span>1. Learn</span><span>2. Try</span><span>3. Check</span>';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'game-hint-button';
+        button.textContent = '💡 Show Hint';
+
+        const hint = document.createElement('div');
+        hint.className = 'game-hint';
+        hint.textContent = hints[key];
+        hint.setAttribute('role', 'status');
+
+        const firstContent = game.querySelector('.stickman-hint, p');
+        (firstContent || game.querySelector('h3')).insertAdjacentElement('afterend', flow);
+        game.append(button, hint);
+
+        button.addEventListener('click', () => {
+            const open = hint.classList.toggle('show');
+            button.textContent = open ? '🙈 Hide Hint' : '💡 Show Hint';
+        });
+    });
+}
 
 function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -976,6 +1020,205 @@ function initCbrtGame() {
     });
 
     newQuestion();
+}
+
+function initStickmanPhysicsLab() {
+    const canvas = document.getElementById('physics-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    const angleSlider = document.getElementById('physics-angle');
+    const powerSlider = document.getElementById('physics-power');
+    const angleValue = document.getElementById('angle-value');
+    const powerValue = document.getElementById('power-value');
+    const launchBtn = document.getElementById('physics-launch');
+    const resetBtn = document.getElementById('physics-reset');
+    const messageEl = document.getElementById('physics-message');
+    const scoreEl = document.getElementById('physics-score');
+
+    let score = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let isAnimating = false;
+    let animId = null;
+
+    const groundY = 250;
+    const startX = 60;
+    const startY = groundY - 60;
+    const scale = 6; // scale meters to pixels
+
+    function randomTarget() {
+        targetX = randInt(220, 520);
+        targetY = groundY - 20;
+    }
+
+    function drawScene() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Sky gradient already in CSS, but draw ground line
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+
+        // Target
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(targetX, targetY - 10, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎯', targetX, targetY - 5);
+
+        // Launcher
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(startX - 20, groundY - 10, 40, 10);
+
+        // Stickman at launcher
+        drawStickman(ctx, startX, startY - 25, 1);
+
+        // Angle line
+        const angle = parseInt(angleSlider.value) * Math.PI / 180;
+        const power = parseInt(powerSlider.value);
+        const lineLen = power * 3;
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(startX, startY - 25);
+        ctx.lineTo(startX + Math.cos(angle) * lineLen, startY - 25 - Math.sin(angle) * lineLen);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    function drawStickman(context, x, y, scaleFactor = 1) {
+        const s = scaleFactor;
+        context.strokeStyle = '#1e293b';
+        context.lineWidth = 2 * s;
+        context.lineCap = 'round';
+
+        // Head
+        context.beginPath();
+        context.arc(x, y - 20 * s, 8 * s, 0, Math.PI * 2);
+        context.stroke();
+
+        // Body
+        context.beginPath();
+        context.moveTo(x, y - 12 * s);
+        context.lineTo(x, y + 10 * s);
+        context.stroke();
+
+        // Arms
+        context.beginPath();
+        context.moveTo(x, y - 5 * s);
+        context.lineTo(x - 12 * s, y + 5 * s);
+        context.moveTo(x, y - 5 * s);
+        context.lineTo(x + 12 * s, y + 5 * s);
+        context.stroke();
+
+        // Legs
+        context.beginPath();
+        context.moveTo(x, y + 10 * s);
+        context.lineTo(x - 10 * s, y + 28 * s);
+        context.moveTo(x, y + 10 * s);
+        context.lineTo(x + 10 * s, y + 28 * s);
+        context.stroke();
+    }
+
+    function launch() {
+        if (isAnimating) return;
+        isAnimating = true;
+        launchBtn.style.display = 'none';
+        resetBtn.style.display = 'inline-block';
+
+        const angleRad = parseInt(angleSlider.value) * Math.PI / 180;
+        const v0 = parseInt(powerSlider.value);
+        const g = 9.8;
+
+        let t = 0;
+        const dt = 0.05;
+        const points = [];
+
+        function animate() {
+            t += dt;
+            const x = startX + (v0 * Math.cos(angleRad) * t) * scale;
+            const y = (startY - 25) - (v0 * Math.sin(angleRad) * t - 0.5 * g * t * t) * scale;
+
+            points.push({ x, y });
+
+            drawScene();
+
+            // Draw trajectory
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            if (points.length > 0) {
+                ctx.moveTo(points[0].x, points[0].y);
+                for (let i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i].x, points[i].y);
+                }
+            }
+            ctx.stroke();
+
+            // Draw flying stickman
+            drawStickman(ctx, x, y, 0.8);
+
+            // Check ground hit
+            if (y >= groundY - 10 || x > canvas.width || x < 0) {
+                isAnimating = false;
+                cancelAnimationFrame(animId);
+
+                const distance = Math.abs(x - targetX);
+                if (distance < 20) {
+                    score++;
+                    scoreEl.textContent = score;
+                    messageEl.textContent = '🎉 Direct hit! Physics + math = success!';
+                    messageEl.className = 'game-feedback correct';
+                    celebrateStickman('physics-stickman');
+                } else if (distance < 60) {
+                    messageEl.textContent = '🔥 Close! Adjust angle or power a little.';
+                    messageEl.className = 'game-feedback';
+                } else if (x < targetX) {
+                    messageEl.textContent = '📈 Too short! Try more power or a higher angle.';
+                    messageEl.className = 'game-feedback wrong';
+                } else {
+                    messageEl.textContent = '📉 Too far! Try less power or a lower angle.';
+                    messageEl.className = 'game-feedback wrong';
+                }
+                return;
+            }
+
+            animId = requestAnimationFrame(animate);
+        }
+
+        animate();
+    }
+
+    function reset() {
+        if (animId) cancelAnimationFrame(animId);
+        isAnimating = false;
+        randomTarget();
+        drawScene();
+        launchBtn.style.display = 'inline-block';
+        resetBtn.style.display = 'none';
+        messageEl.textContent = 'Hit the red target!';
+        messageEl.className = 'game-feedback';
+    }
+
+    angleSlider.addEventListener('input', () => {
+        angleValue.textContent = angleSlider.value + '°';
+        if (!isAnimating) drawScene();
+    });
+
+    powerSlider.addEventListener('input', () => {
+        powerValue.textContent = powerSlider.value;
+        if (!isAnimating) drawScene();
+    });
+
+    launchBtn.addEventListener('click', launch);
+    resetBtn.addEventListener('click', reset);
+
+    randomTarget();
+    drawScene();
 }
 
 function initTesseractGame() {
