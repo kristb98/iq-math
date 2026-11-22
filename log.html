@@ -58,10 +58,23 @@
 
                 <div class="game-box">
                     <h3>🚀 Mini Game: Rocket to 80!</h3>
+                    <div class="stickman-hint">
+                        <div class="stickman" id="log-stickman">
+                            <div class="s-head"></div>
+                            <div class="s-body"></div>
+                            <div class="s-arm s-left-arm"></div>
+                            <div class="s-arm s-right-arm"></div>
+                            <div class="s-leg s-left-leg"></div>
+                            <div class="s-leg s-right-leg"></div>
+                        </div>
+                        <p>Help the stickman land the rocket on 80!</p>
+                    </div>
                     <p>Slide the power to launch the rocket. Land exactly on 80!</p>
                     <input type="range" min="10" max="20" value="15" class="slider rocket-slider" id="rocket-slider">
                     <div class="rocket-track">
-                        <div class="rocket" id="rocket">🚀</div>
+                        <div class="rocket" id="rocket">
+                            <span class="rocket-stickman">🧑‍🚀</span>
+                        </div>
                         <div class="rocket-target">🎯 80</div>
                     </div>
                     <p>Power: <span id="rocket-power">1.5</span> → Height: <span id="rocket-height">31.62</span></p>

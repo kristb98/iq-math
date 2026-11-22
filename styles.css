@@ -1089,6 +1089,117 @@ code {
     color: var(--white);
 }
 
+/* Stickman characters */
+.stickman-hint {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 2px dashed #fcd34d;
+}
+
+.stickman-hint p {
+    margin: 0;
+    font-weight: 700;
+    color: #92400e;
+}
+
+.stickman {
+    position: relative;
+    width: 50px;
+    height: 80px;
+    flex-shrink: 0;
+    animation: stickmanBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes stickmanBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.s-head {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--text);
+    border-radius: 50%;
+    background: var(--white);
+}
+
+.s-body {
+    position: absolute;
+    top: 19px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 28px;
+    background: var(--text);
+    border-radius: 2px;
+}
+
+.s-arm {
+    position: absolute;
+    top: 24px;
+    width: 18px;
+    height: 3px;
+    background: var(--text);
+    border-radius: 2px;
+    transform-origin: 100% 50%;
+}
+
+.s-left-arm {
+    left: 7px;
+    transform: rotate(-30deg);
+}
+
+.s-right-arm {
+    right: 7px;
+    transform: rotate(30deg);
+}
+
+.s-leg {
+    position: absolute;
+    top: 45px;
+    width: 3px;
+    height: 22px;
+    background: var(--text);
+    border-radius: 2px;
+    transform-origin: top center;
+}
+
+.s-left-leg {
+    left: 21px;
+    transform: rotate(-20deg);
+}
+
+.s-right-leg {
+    right: 21px;
+    transform: rotate(20deg);
+}
+
+/* Stickman celebrating when correct */
+.stickman.celebrate {
+    animation: stickmanCelebrate 0.6s ease-in-out infinite;
+}
+
+@keyframes stickmanCelebrate {
+    0%, 100% { transform: rotate(0deg) translateY(0); }
+    25% { transform: rotate(-10deg) translateY(-8px); }
+    75% { transform: rotate(10deg) translateY(-8px); }
+}
+
+.rocket-stickman {
+    display: block;
+    font-size: 1.5rem;
+    transform: rotate(-45deg);
+}
+
 .tesseract-svg.highlight-vertices rect {
     stroke: #ef4444;
 }

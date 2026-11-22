@@ -589,6 +589,14 @@ function initCbrtVisualizer() {
     update();
 }
 
+function celebrateStickman(id) {
+    const stickman = id ? document.getElementById(id) : null;
+    if (stickman) {
+        stickman.classList.add('celebrate');
+        setTimeout(() => stickman.classList.remove('celebrate'), 1500);
+    }
+}
+
 function initRocketGame() {
     const slider = document.getElementById('rocket-slider');
     const launchBtn = document.getElementById('rocket-launch');
@@ -618,6 +626,7 @@ function initRocketGame() {
         if (diff < 1) {
             messageEl.textContent = '🎉 PERFECT LANDING! You found log(80) ≈ 1.9!';
             messageEl.className = 'game-feedback correct';
+            celebrateStickman('log-stickman');
         } else if (diff < 5) {
             messageEl.textContent = '🔥 So close! Try a tiny bit more or less power.';
             messageEl.className = 'game-feedback';
@@ -685,6 +694,7 @@ function initAnimalGame() {
             if (found.size === max) {
                 messageEl.textContent = '🏆 You found ALL the arrangements! Amazing!';
                 messageEl.className = 'game-feedback correct';
+                celebrateStickman('factorial-stickman');
             } else {
                 messageEl.textContent = `✨ New arrangement found! That's ${found.size} out of ${max}!`;
                 messageEl.className = 'game-feedback';
@@ -748,6 +758,7 @@ function initCityGame() {
         } else {
             messageEl.textContent = '🎉 All houses lit! Mass really IS energy!';
             messageEl.className = 'game-feedback correct';
+            celebrateStickman('energy-stickman');
         }
     }
 
@@ -812,6 +823,7 @@ function initMatchGame() {
                         if (matched === pairs.length) {
                             messageEl.textContent = '🏆 All matched! You know your powers!';
                             messageEl.className = 'game-feedback correct';
+                            celebrateStickman('power-stickman');
                         } else {
                             messageEl.textContent = '✅ Match found! Keep going!';
                             messageEl.className = 'game-feedback correct';
@@ -885,6 +897,7 @@ function initSqrtGame() {
             scoreEl.textContent = score;
             messageEl.textContent = `🎉 Perfect! √${currentSide * currentSide} = ${currentSide}!`;
             messageEl.className = 'game-feedback correct';
+            celebrateStickman('sqrt-stickman');
             setTimeout(newQuestion, 2000);
         } else {
             messageEl.textContent = `❌ Not quite. The side is ${currentSide}. Try again!`;
@@ -950,6 +963,7 @@ function initCbrtGame() {
             scoreEl.textContent = score;
             messageEl.textContent = `🎉 Perfect! ∛${currentSide * currentSide * currentSide} = ${currentSide}!`;
             messageEl.className = 'game-feedback correct';
+            celebrateStickman('cbrt-stickman');
             setTimeout(newQuestion, 2000);
         } else {
             messageEl.textContent = `❌ Not quite. The side is ${currentSide}. Try again!`;
@@ -998,6 +1012,7 @@ function initTesseractGame() {
                 if (parts.size === 4) {
                     messageEl.textContent = '🏆 You explored all the parts of the tesseract!';
                     messageEl.className = 'game-feedback correct';
+                    celebrateStickman('tesseract-stickman');
                 } else {
                     messageEl.textContent = partNames[part];
                     messageEl.className = 'game-feedback';
