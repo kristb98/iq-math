@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Beltmatic: Factorial Factory</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Clean Geometric & Friendly Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Confetti for Level Completions -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            background-color: #f1f5f9;
+        }
+        h1, h2, h3, .font-fredoka {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* Beltmatic-style tactile dock buttons */
+        .dock-btn {
+            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.1s ease, border-color 0.12s ease;
+            box-shadow: 0 4px 0 rgba(15, 23, 42, 0.14);
+        }
+        .dock-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(15, 23, 42, 0.16);
+        }
+        .dock-btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(15, 23, 42, 0.14);
+        }
+        .dock-btn.active {
+            transform: translateY(-3px);
+            border-color: #0284c7;
+            background-color: #e0f2fe;
+            box-shadow: 0 6px 0 #0284c7;
+        }
+        .dock-btn:disabled {
+            opacity: 0.42;
+            cursor: not-allowed;
+            filter: grayscale(0.7);
+        }
+
+        .ui-pill {
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.88); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="relative w-full h-full">
+
+    <!-- ===================================================================== -->
+    <!-- FULL-SCREEN INTERACTIVE FACTORY GRID CANVAS                           -->
+    <!-- ===================================================================== -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- ===================================================================== -->
+    <!-- TOP HUD BAR: LEVEL GOAL, BLUEPRINT FORMULA & CONTROLS                 -->
+    <!-- ===================================================================== -->
+    <header class="pointer-events-none fixed top-0 left-0 right-0 z-20 p-2.5 sm:p-3.5 flex flex-wrap items-start justify-between gap-2.5">
+
+        <!-- Left: Brand + Current Level Goal Card -->
+        <div class="pointer-events-auto bg-white/95 backdrop-blur-md border-2 border-slate-300 rounded-2xl p-2.5 sm:px-4 sm:py-3 ui-pill flex items-center gap-3 max-w-full sm:max-w-xl">
+            <!-- Level Badge -->
+            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white font-fredoka font-bold flex flex-col items-center justify-center shrink-0 shadow-sm border border-sky-700">
+                <span class="text-[9px] uppercase tracking-wider opacity-90 leading-none">LVL</span>
+                <span id="hud-level-num" class="text-lg sm:text-xl leading-tight">1</span>
+            </div>
+
+            <!-- Goal Text & Progress Bar -->
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <h1 id="hud-level-title" class="font-fredoka font-bold text-sm sm:text-base text-slate-900 truncate">
+                        Belt Basics
+                    </h1>
+                    <span id="hud-goal-badge" class="bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                        Deliver: 3
+                    </span>
+                </div>
+                <p id="hud-level-desc" class="text-xs font-bold text-slate-600 truncate mt-0.5">
+                    Connect a [3] Extractor to the Central Hub using Belts!
+                </p>
+
+                <!-- Delivery Progress Bar -->
+                <div class="mt-1.5 flex items-center gap-2">
+                    <div class="flex-1 h-2.5 bg-slate-200 rounded-full overflow-hidden border border-slate-300">
+                        <div id="hud-progress-bar" class="h-full bg-gradient-to-r from-emerald-400 to-green-500 transition-all duration-200" style="width: 0%;"></div>
+                    </div>
+                    <span id="hud-progress-text" class="font-fredoka font-bold text-xs text-slate-700 shrink-0">
+                        0 / 5
+                    </span>
+                </div>
+            </div>
+
+            <!-- Level Selector Dropdown / Next Button -->
+            <div class="flex items-center gap-1 shrink-0">
+                <button onclick="prevLevel()" id="btn-prev-lvl" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center" title="Previous Level">◀</button>
+                <button onclick="nextLevel()" id="btn-next-lvl" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center" title="Next Level">▶</button>
+            </div>
+        </div>
+
+        <!-- Center/Right: Toggleable Factorial Blueprint Formula & Utility Controls -->
+        <div class="pointer-events-auto flex flex-wrap items-center gap-2 ml-auto">
+            <!-- Toggleable Factorial Formula Pill -->
+            <button id="btn-formula-toggle" onclick="toggleFormulaCard()" class="bg-slate-900/95 hover:bg-slate-800 text-white border-2 border-slate-700 rounded-2xl px-3 py-2 ui-pill flex items-center gap-2 text-xs sm:text-sm font-fredoka font-bold">
+                <span class="text-amber-400">📐</span>
+                <span id="formula-pill-text">3 = 3</span>
+            </button>
+
+            <!-- Play / Pause (Space) -->
+            <button id="btn-pause" onclick="togglePause()" class="bg-white/95 hover:bg-slate-100 border-2 border-slate-300 rounded-2xl px-3 py-2 ui-pill text-xs sm:text-sm font-fredoka font-bold text-slate-800 flex items-center gap-1" title="Pause / Resume (Space)">
+                <span id="pause-icon">⏸️</span>
+                <span class="hidden md:inline" id="pause-label">Pause</span>
+            </button>
+
+            <!-- Clear Items on Belts (X) -->
+            <button onclick="clearMovingItems()" class="bg-white/95 hover:bg-amber-50 border-2 border-slate-300 rounded-2xl px-3 py-2 ui-pill text-xs sm:text-sm font-fredoka font-bold text-slate-700 flex items-center gap-1" title="Flush Items on Belts (X)">
+                <span>🧹</span>
+                <span class="hidden md:inline">Flush</span>
+            </button>
+
+            <!-- Reset Map -->
+            <button onclick="resetCurrentLevelMap()" class="bg-white/95 hover:bg-rose-50 border-2 border-slate-300 rounded-2xl px-3 py-2 ui-pill text-xs sm:text-sm font-fredoka font-bold text-rose-700 flex items-center gap-1" title="Reset Level Map">
+                <span>🔄</span>
+                <span class="hidden md:inline">Reset</span>
+            </button>
+
+            <!-- Help / Guide -->
+            <button onclick="openHelpModal()" class="bg-amber-400 hover:bg-amber-300 border-2 border-amber-600 rounded-2xl px-3 py-2 ui-pill text-xs sm:text-sm font-fredoka font-bold text-slate-900 flex items-center gap-1" title="How to Play">
+                <span>📖</span>
+                <span class="hidden sm:inline">Guide</span>
+            </button>
+
+            <!-- Sound Toggle -->
+            <button id="btn-mute" onclick="toggleMute()" class="bg-white/95 hover:bg-slate-100 border-2 border-slate-300 rounded-2xl px-2.5 py-2 ui-pill text-sm" aria-label="Toggle Sound">
+                🔊
+            </button>
+        </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- EXPANDABLE FACTORIAL FORMULA OVERLAY CARD                             -->
+    <!-- ===================================================================== -->
+    <div id="formula-overlay-card" class="hidden fixed top-20 right-3 z-20 bg-slate-900/95 backdrop-blur-md text-white border-2 border-sky-500 rounded-2xl p-4 max-w-sm shadow-2xl animate-pop">
+        <div class="flex items-center justify-between gap-2 pb-2 border-b border-slate-700">
+            <span class="font-fredoka font-bold text-sky-300 text-sm uppercase tracking-wider">📐 Target Blueprint</span>
+            <button onclick="toggleFormulaCard()" class="text-slate-400 hover:text-white text-xs font-bold px-1.5 py-0.5 rounded bg-slate-800">✕</button>
+        </div>
+        <div id="formula-detail-body" class="mt-2.5 space-y-1.5 text-sm font-bold">
+            <!-- Populated dynamically per level -->
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- FLOATING INSPECTOR CARD (Click any machine or item on grid)           -->
+    <!-- ===================================================================== -->
+    <div id="inspector-card" class="hidden fixed top-24 left-3 z-20 bg-white/95 backdrop-blur-md border-2 border-sky-500 rounded-2xl p-3.5 max-w-xs shadow-xl animate-pop">
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span id="insp-icon" class="text-xl">⚙️</span>
+                <h3 id="insp-title" class="font-fredoka font-bold text-sm sm:text-base text-slate-900">Machine</h3>
+            </div>
+            <button onclick="hideInspector()" class="text-slate-400 hover:text-slate-700 text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100">✕</button>
+        </div>
+        <p id="insp-desc" class="text-xs font-bold text-slate-600 mt-1.5 leading-relaxed"></p>
+        <div id="insp-state" class="mt-2 bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 font-fredoka text-xs font-bold text-sky-800"></div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- SANDBOX EXTRACTOR SPAWNER BAR (Visible in Level 8 Freeplay)           -->
+    <!-- ===================================================================== -->
+    <div id="sandbox-bar" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-20 bg-white/95 backdrop-blur-md border-2 border-purple-400 rounded-2xl px-3 py-2 ui-pill flex items-center gap-1.5">
+        <span class="text-xs font-extrabold text-purple-800 px-1">Spawn Extractor:</span>
+        <div id="sandbox-node-buttons" class="flex items-center gap-1"></div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- CAMERA ZOOM & ROTATE FLOATING CONTROLS (Bottom-Right)                 -->
+    <!-- ===================================================================== -->
+    <div class="fixed bottom-24 right-3 z-20 flex flex-col gap-1.5">
+        <button onclick="rotateSelectedTool()" class="bg-white/95 hover:bg-sky-50 border-2 border-slate-300 rounded-xl w-10 h-10 ui-pill font-fredoka font-bold text-slate-800 flex items-center justify-center text-base" title="Rotate Tool (R)">
+            ↻
+        </button>
+        <button onclick="adjustZoom(0.15)" class="bg-white/95 hover:bg-slate-100 border-2 border-slate-300 rounded-xl w-10 h-10 ui-pill font-fredoka font-bold text-slate-800 flex items-center justify-center text-lg" title="Zoom In (+)">
+            +
+        </button>
+        <button onclick="adjustZoom(-0.15)" class="bg-white/95 hover:bg-slate-100 border-2 border-slate-300 rounded-xl w-10 h-10 ui-pill font-fredoka font-bold text-slate-800 flex items-center justify-center text-lg" title="Zoom Out (-)">
+            −
+        </button>
+        <button onclick="centerCameraOnHub()" class="bg-white/95 hover:bg-slate-100 border-2 border-slate-300 rounded-xl w-10 h-10 ui-pill text-xs font-bold text-slate-700 flex items-center justify-center" title="Center on Hub (H)">
+            🎯
+        </button>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- BOTTOM BELTMATIC TOOLBAR DOCK                                         -->
+    <!-- ===================================================================== -->
+    <footer class="pointer-events-none fixed bottom-0 left-0 right-0 z-20 p-2.5 sm:p-3 flex justify-center">
+        <div class="pointer-events-auto bg-white/95 backdrop-blur-md border-2 border-slate-300 rounded-3xl p-2 ui-pill flex items-center gap-1.5 sm:gap-2 overflow-x-auto max-w-full">
+
+            <!-- Tool 1: Conveyor Belt -->
+            <button id="tool-belt" onclick="selectTool('belt')" class="dock-btn active bg-white border-2 border-slate-200 rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex flex-col items-center min-w-[64px] sm:min-w-[74px]" title="Conveyor Belt (1) — Drag to draw paths!">
+                <span class="text-lg sm:text-xl leading-none">➡️</span>
+                <span class="font-fredoka font-bold text-[11px] sm:text-xs text-slate-800 mt-1">Belt</span>
+                <span class="text-[9px] font-extrabold text-slate-400">Key 1</span>
+            </button>
+
+            <!-- Tool 2: Multiplier (×) -->
+            <button id="tool-multiplier" onclick="selectTool('multiplier')" class="dock-btn bg-white border-2 border-slate-200 rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex flex-col items-center min-w-[64px] sm:min-w-[74px]" title="Multiplier (2) — Multiplies 2 inputs (A × B)">
+                <span class="text-lg sm:text-xl leading-none font-fredoka font-bold text-teal-600">×</span>
+                <span class="font-fredoka font-bold text-[11px] sm:text-xs text-slate-800 mt-1">Multiply</span>
+                <span class="text-[9px] font-extrabold text-slate-400">Key 2</span>
+            </button>
+
+            <!-- Tool 3: Splitter (⑂) -->
+            <button id="tool-splitter" onclick="selectTool('splitter')" class="dock-btn bg-white border-2 border-slate-200 rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex flex-col items-center min-w-[64px] sm:min-w-[74px]" title="Splitter (3) — Alternates incoming items between 2 outputs">
+                <span class="text-lg sm:text-xl leading-none font-bold text-sky-600">⑂</span>
+                <span class="font-fredoka font-bold text-[11px] sm:text-xs text-slate-800 mt-1">Splitter</span>
+                <span class="text-[9px] font-extrabold text-slate-400">Key 3</span>
+            </button>
+
+            <!-- Tool 4: Factorial Unpacker (!) -->
+            <button id="tool-unpacker" onclick="selectTool('unpacker')" class="dock-btn bg-white border-2 border-slate-200 rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex flex-col items-center min-w-[64px] sm:min-w-[74px]" title="Factorial Unpacker (4) — Expands n into n, n-1, ..., 1">
+                <span class="text-lg sm:text-xl leading-none font-fredoka font-bold text-purple-600">n!</span>
+                <span class="font-fredoka font-bold text-[11px] sm:text-xs text-slate-800 mt-1">Unpacker</span>
+                <span class="text-[9px] font-extrabold text-slate-400">Key 4</span>
+            </button>
+
+            <!-- Tool 5: Decrementer (-1) -->
+            <button id="tool-decrementer" onclick="selectTool('decrementer')" class="dock-btn bg-white border-2 border-slate-200 rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex flex-col items-center min-w-[64px] sm:min-w-[74px]" title="Decrementer (5) — Subtracts 1 (n → n-1)">
+                <span class="text-lg sm:text-xl leading-none font-fredoka font-bold text-amber-600">-1</span>
+                <span class="font-fredoka font-bold text-[11px] sm:text-xs text-slate-800 mt-1">Minus 1</span>
+                <span class="text-[9px] font-extrabold text-slate-400">Key 5</span>
+            </button>
+
+            <!-- Tool 6: Trash / Incinerator -->
+            <button id="tool-trash" onclick="selectTool('trash')" class="dock-btn bg-white border-2 border-slate-200 rounded-2xl px-2.5 py-1.5 sm:px-3.5 sm:py-2 flex flex-col items-center min-w-[64px] sm:min-w-[74px]" title="Trash Bin (6) — Clears excess numbers so belts keep moving">
+                <span class="text-lg sm:text-xl leading-none">🗑️</span>
+                <span class="font-fredoka font-bold text-[11px] sm:text-xs text-slate-800 mt-1">Trash</span>
+                <span class="text-[9px] font-extrabold text-slate-400">Key 6</span>
+            </button>
+
+            <!-- Divider -->
+            <div class="w-px h-10 bg-slate-200 mx-0.5 shrink-0"></div>
+
+            <!-- Rotate Button -->
+            <button onclick="rotateSelectedTool()" class="dock-btn bg-amber-50 border-2 border-amber-300 rounded-2xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex flex-col items-center min-w-[58px]" title="Rotate Direction (R)">
+                <span id="dock-dir-arrow" class="text-lg sm:text-xl leading-none font-bold text-amber-700">→</span>
+                <span class="font-fredoka font-bold text-[11px] sm:text-xs text-amber-900 mt-1">Rotate</span>
+                <span class="text-[9px] font-extrabold text-amber-700">Key R</span>
+            </button>
+
+            <!-- Eraser / Delete Tool -->
+            <button id="tool-erase" onclick="selectTool('erase')" class="dock-btn bg-rose-50 border-2 border-rose-200 rounded-2xl px-2.5 py-1.5 sm:px-3 sm:py-2 flex flex-col items-center min-w-[58px]" title="Delete Machine/Belt (E or Right-Click)">
+                <span class="text-lg sm:text-xl leading-none">❌</span>
+                <span class="font-fredoka font-bold text-[11px] sm:text-xs text-rose-800 mt-1">Erase</span>
+                <span class="text-[9px] font-extrabold text-rose-500">R-Click</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- LEVEL COMPLETE CELEBRATION BANNER MODAL                               -->
+    <!-- ===================================================================== -->
+    <div id="level-complete-modal" class="hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 border-4 border-emerald-400 shadow-2xl text-center animate-pop">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-emerald-100 border-2 border-emerald-400 flex items-center justify-center text-4xl mb-3">
+                🎉
+            </div>
+            <h2 id="win-modal-title" class="font-fredoka text-2xl sm:text-3xl font-bold text-slate-900">
+                Level Complete!
+            </h2>
+            <p id="win-modal-summary" class="text-sm sm:text-base font-bold text-slate-600 mt-2 leading-relaxed">
+                You automated 3! = 3 × 2 × 1 = 6!
+            </p>
+            <div id="win-unlock-box" class="hidden mt-3 bg-sky-50 border-2 border-sky-300 rounded-2xl p-3 text-xs sm:text-sm font-extrabold text-sky-900">
+                🔓 Unlocked New Machine!
+            </div>
+            <div class="mt-5 flex items-center justify-center gap-3">
+                <button onclick="closeWinModal()" class="dock-btn bg-slate-100 border-2 border-slate-300 text-slate-700 font-fredoka font-bold px-4 py-2.5 rounded-2xl text-sm">
+                    Keep Building
+                </button>
+                <button onclick="advanceAfterWin()" class="dock-btn bg-emerald-500 border-2 border-emerald-700 text-white font-fredoka font-bold px-6 py-2.5 rounded-2xl text-base">
+                    Next Level ➡️
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- OPERATOR GUIDE MODAL (Beltmatic Factorial Controls & Rules)           -->
+    <!-- ===================================================================== -->
+    <div id="help-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5" onclick="closeHelpOnBackdrop(event)">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] overflow-y-auto p-5 sm:p-7 border-4 border-sky-400 shadow-2xl animate-pop">
+            <div class="flex items-center justify-between pb-3 border-b-2 border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-3xl">🏭</span>
+                    <h2 class="font-fredoka text-2xl font-bold text-slate-900">Beltmatic: Factorial Factory Guide</h2>
+                </div>
+                <button onclick="closeHelpModal()" class="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 font-bold">✕</button>
+            </div>
+
+            <div class="mt-4 space-y-3 text-xs sm:text-sm font-bold text-slate-700">
+                <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-3.5">
+                    <h3 class="font-fredoka text-base text-sky-900 mb-1">1. Drawing Belts & Moving Around</h3>
+                    <p>• <strong>Left-Click & Drag</strong> on empty tiles to draw auto-curving Conveyor Belts!</p>
+                    <p>• <strong>Right-Click</strong> (or use <strong>Erase</strong>) to delete a belt or machine. Press <strong>R</strong> to rotate before placing.</p>
+                    <p>• <strong>Pan & Zoom:</strong> Drag with middle-mouse or WASD/Arrow keys to move around the grid; scroll wheel or <strong>+ / −</strong> to zoom.</p>
+                </div>
+
+                <div class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-3.5">
+                    <h3 class="font-fredoka text-base text-purple-900 mb-1">2. How Machines Expand Factorials</h3>
+                    <p>• <span class="text-purple-700 font-extrabold">Unpacker (n!):</span> Place directly on or after a number! When <code class="bg-white px-1 rounded">4</code> enters, it outputs <code class="bg-white px-1 rounded">4 → 3 → 2 → 1</code> one by one! For <code class="bg-white px-1 rounded">0</code>, it outputs <code class="bg-white px-1 rounded">1</code> (<code class="bg-white px-1 rounded">0! = 1</code>).</p>
+                    <p>• <span class="text-sky-700 font-extrabold">Splitter (⑂):</span> Alternates incoming numbers left & right — perfect for sending an Unpacker stream into both sides of a Multiplier!</p>
+                    <p>• <span class="text-teal-700 font-extrabold">Multiplier (×):</span> Takes 2 side inputs (blue arrows) and outputs their product (<code class="bg-white px-1 rounded">A × B</code>) out the front!</p>
+                    <p>• <span class="text-amber-700 font-extrabold">Minus 1 (-1):</span> Subtracts 1 from a number (<code class="bg-white px-1 rounded">4 → 3</code>) so you can build custom recursive factorial chains!</p>
+                </div>
+            </div>
+
+            <div class="mt-5 text-center">
+                <button onclick="closeHelpModal()" class="dock-btn bg-sky-500 border-2 border-sky-700 text-white font-fredoka font-bold px-8 py-2.5 rounded-2xl text-base">
+                    Let's Automate! 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================================
+           1. WEB AUDIO SYNTHESIZER (Crisp Factory Clicks, Multiplies & Hub Dings)
+           ========================================================================= */
+        let audioCtx = null;
+        let isMuted = false;
+
+        function ensureAudio() {
+            if (!audioCtx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AC();
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            try {
+                ensureAudio();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                if (type === 'place') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(340, now);
+                    osc.frequency.exponentialRampToValueAtTime(520, now + 0.06);
+                    gain.gain.setValueAtTime(0.14, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+                } else if (type === 'erase') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(280, now);
+                    osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+                    gain.gain.setValueAtTime(0.14, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                } else if (type === 'rotate') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(480, now);
+                    osc.frequency.exponentialRampToValueAtTime(620, now + 0.05);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                } else if (type === 'multiply') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(660, now + 0.11);
+                    gain.gain.setValueAtTime(0.11, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                } else if (type === 'deliver') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(587.33, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.14);
+                    gain.gain.setValueAtTime(0.16, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+                } else if (type === 'win') {
+                    const notes = [523.25, 659.25, 783.99, 1046.5];
+                    notes.forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.type = 'triangle';
+                        const t = now + i * 0.08;
+                        o.frequency.setValueAtTime(freq, t);
+                        g.gain.setValueAtTime(0.18, t);
+                        g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.start(t); o.stop(t + 0.3);
+                    });
+                    return;
+                }
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.18);
+            } catch (e) {}
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.getElementById('btn-mute').textContent = isMuted ? '🔇' : '🔊';
+        }
+
+        /* =========================================================================
+           2. GRID CONSTANTS, DIRECTIONS & FACTORIAL CAMPAIGN LEVELS (1 to 8)
+           ========================================================================= */
+        const GRID_COLS = 36;
+        const GRID_ROWS = 26;
+        const TILE_SIZE = 54;
+        const HUB_COL = 17; // 2x2 Hub occupies cols 17..18, rows 12..13
+        const HUB_ROW = 12;
+
+        // Cardinal Directions: 0 = Right, 1 = Down, 2 = Left, 3 = Up
+        const DIRS = [
+            { dx: 1,  dy: 0,  arrow: '→', angle: 0 },
+            { dx: 0,  dy: 1,  arrow: '↓', angle: Math.PI / 2 },
+            { dx: -1, dy: 0,  arrow: '←', angle: Math.PI },
+            { dx: 0,  dy: -1, arrow: '↑', angle: -Math.PI / 2 }
+        ];
+
+        const LEVELS = [
+            {
+                id: 1,
+                title: 'Belt Basics',
+                targetValue: 3,
+                targetCount: 5,
+                desc: 'Drag Conveyor Belts from the [3] Extractor to the Central Hub!',
+                formulaShort: 'Target: 3',
+                formulaDetail: '<p class="text-amber-300">Goal: Deliver 3 to the Hub (5 times)</p><p class="text-slate-300">Left-click and drag from the green [3] Extractor right into any edge of the Central Hub!</p>',
+                unlockedTools: ['belt', 'erase'],
+                unlockBanner: 'Unlocked Multiplier (×)! Now you can multiply numbers together!',
+                extractors: [
+                    { col: 11, row: 12, val: 3, dir: 0 }
+                ],
+                starterHint: 'Drag from [3] on the left to the Hub in the center!'
+            },
+            {
+                id: 2,
+                title: 'First Factorial (3! = 6)',
+                targetValue: 6,
+                targetCount: 6,
+                desc: 'Multiply [3] and [2] in a Multiplier (×) to make 3! = 6!',
+                formulaShort: '3! = 3 × 2 × 1 = 6',
+                formulaDetail: '<p class="text-amber-300">3! (3 Factorial) = 3 × 2 × 1 = 6</p><p class="text-slate-300">Feed [3] into one blue side arrow of a Multiplier (×) and [2] into the other side arrow, then belt the output (6) to the Hub!</p>',
+                unlockedTools: ['belt', 'multiplier', 'trash', 'erase'],
+                unlockBanner: 'Unlocked Unpacker (n!) & Splitter (⑂)!',
+                extractors: [
+                    { col: 11, row: 10, val: 3, dir: 0 },
+                    { col: 11, row: 14, val: 2, dir: 0 }
+                ],
+                starterHint: 'Feed [3] and [2] into the blue inputs of a Multiplier (×)!'
+            },
+            {
+                id: 3,
+                title: 'The Unpacker (4! = 24)',
+                targetValue: 24,
+                targetCount: 6,
+                desc: 'Use Unpacker (n!) on [4] to get 4→3→2→1, split & multiply to 24!',
+                formulaShort: '4! = 4 × 3 × 2 × 1 = 24',
+                formulaDetail: '<p class="text-amber-300">4! = 4 × 3 × 2 × 1 = 24</p><p class="text-slate-300">1. Send [4] into an Unpacker (n!) to stream 4, 3, 2, 1.<br>2. Use a Splitter (⑂) and Multipliers (×) (or combine with the helper [2] node!) to deliver 24!</p>',
+                unlockedTools: ['belt', 'multiplier', 'splitter', 'unpacker', 'trash', 'erase'],
+                unlockBanner: 'Unlocked Minus 1 (-1)! Build custom countdown chains!',
+                extractors: [
+                    { col: 9,  row: 12, val: 4, dir: 0 },
+                    { col: 14, row: 7,  val: 2, dir: 1 },
+                    { col: 23, row: 12, val: 3, dir: 2 }
+                ],
+                starterHint: 'Place Unpacker (n!) in front of [4], then split & multiply!'
+            },
+            {
+                id: 4,
+                title: 'Build Your Own Factorial (-1)',
+                targetValue: 24,
+                targetCount: 6,
+                desc: 'Split [4] and use Minus 1 (-1) + Multipliers (×) to craft 4! = 24!',
+                formulaShort: '4! = 4 × (4-1) × (4-2) × 1 = 24',
+                formulaDetail: '<p class="text-amber-300">Recursive Countdown: n × (n-1) × (n-2)...</p><p class="text-slate-300">Split a [4] line: keep one [4], send another through (-1) to get [3], and another through two (-1)s to get [2]. Multiply 4 × 3 × 2 = 24!</p>',
+                unlockedTools: ['belt', 'multiplier', 'splitter', 'unpacker', 'decrementer', 'trash', 'erase'],
+                unlockBanner: 'Unlocked Level 5: The Zero Factorial Mystery!',
+                extractors: [
+                    { col: 9,  row: 12, val: 4, dir: 0 },
+                    { col: 25, row: 12, val: 4, dir: 2 }
+                ],
+                starterHint: 'Use Splitter (⑂) + Minus 1 (-1) to create 4, 3, and 2 from one [4]!'
+            },
+            {
+                id: 5,
+                title: 'The Zero Rule (0! = 1)',
+                targetValue: 1,
+                targetCount: 5,
+                desc: 'What happens when [0] enters an Unpacker (n!)? Deliver 0! = 1!',
+                formulaShort: '0! = 1 (Empty Product Rule)',
+                formulaDetail: '<p class="text-purple-300">Why does 0! = 1?</p><p class="text-slate-300">There is exactly 1 way to arrange zero objects (an empty box!). Feed [0] into an Unpacker (n!) to produce 1!</p>',
+                unlockedTools: ['belt', 'multiplier', 'splitter', 'unpacker', 'decrementer', 'trash', 'erase'],
+                unlockBanner: 'Unlocked Level 6: Scaling up to 5! = 120!',
+                extractors: [
+                    { col: 11, row: 12, val: 0, dir: 0 }
+                ],
+                starterHint: 'Belt [0] into an Unpacker (n!), then belt the resulting [1] to the Hub!'
+            },
+            {
+                id: 6,
+                title: 'Mega Factory (5! = 120)',
+                targetValue: 120,
+                targetCount: 5,
+                desc: 'Expand and multiply 5 × 4 × 3 × 2 × 1 to deliver 5! = 120!',
+                formulaShort: '5! = 5 × 4 × 3 × 2 × 1 = 120',
+                formulaDetail: '<p class="text-amber-300">5! = 5 × 4 × 3 × 2 × 1 = 120</p><p class="text-slate-300">Combine [5] with [4] (20), then multiply by [3] (60), then by [2] (120)! Or unpack [5] and multiply its stream!</p>',
+                unlockedTools: ['belt', 'multiplier', 'splitter', 'unpacker', 'decrementer', 'trash', 'erase'],
+                unlockBanner: 'Unlocked Level 7: The Recursive Shortcut!',
+                extractors: [
+                    { col: 10, row: 9,  val: 5, dir: 0 },
+                    { col: 10, row: 12, val: 4, dir: 0 },
+                    { col: 10, row: 15, val: 3, dir: 0 },
+                    { col: 24, row: 12, val: 2, dir: 2 }
+                ],
+                starterHint: '5 × 4 = 20 → 20 × 3 = 60 → 60 × 2 = 120!'
+            },
+            {
+                id: 7,
+                title: 'Recursive Shortcut (5 × 4!)',
+                targetValue: 120,
+                targetCount: 6,
+                desc: 'Notice 5! = 5 × 4! Multiply [5] by [24] (which is 4!) to get 120!',
+                formulaShort: '5! = 5 × 4! = 5 × 24 = 120',
+                formulaDetail: '<p class="text-purple-300">Recursive Law: n! = n × (n - 1)!</p><p class="text-slate-300">Since 4! = 24 is already extracted on the right, just multiply [5] × [24] = 120 in one single Multiplier!</p>',
+                unlockedTools: ['belt', 'multiplier', 'splitter', 'unpacker', 'decrementer', 'trash', 'erase'],
+                unlockBanner: 'Unlocked Level 8: Infinite Freeplay Sandbox!',
+                extractors: [
+                    { col: 11, row: 10, val: 5,  dir: 0 },
+                    { col: 11, row: 14, val: 24, dir: 0 }
+                ],
+                starterHint: '5 × 4! = 5 × 24 = 120! Wire them into one Multiplier!'
+            },
+            {
+                id: 8,
+                title: 'Freeplay Sandbox',
+                targetValue: 720,
+                targetCount: 10,
+                desc: 'All machines unlocked! Spawn any number extractor and build 6! = 720 or beyond!',
+                formulaShort: '6! = 6 × 5! = 720',
+                formulaDetail: '<p class="text-emerald-300">Freeplay Automation Sandbox</p><p class="text-slate-300">Use the purple bar at the bottom to place new Extractors (0–7) anywhere on the grid!</p>',
+                unlockedTools: ['belt', 'multiplier', 'splitter', 'unpacker', 'decrementer', 'trash', 'erase'],
+                unlockBanner: 'You are a Master Factorial Architect!',
+                extractors: [
+                    { col: 10, row: 10, val: 6,   dir: 0 },
+                    { col: 10, row: 14, val: 120, dir: 0 },
+                    { col: 25, row: 12, val: 5,   dir: 2 }
+                ],
+                starterHint: 'Click any tile after picking a number in the purple bar to place new Extractors!'
+            }
+        ];
+
+        /* =========================================================================
+           3. SIMULATION STATE
+           ========================================================================= */
+        const state = {
+            levelIdx: 0,
+            deliveredCount: 0,
+            levelWonShown: false,
+            isPaused: false,
+
+            // Grid entities keyed by "col,row"
+            // Entity types:
+            // - 'extractor': { type, col, row, val, dir, timer }
+            // - 'belt': { type, col, row, dir, fromDir }
+            // - 'multiplier': { type, col, row, dir, slotA, slotB, animTimer, lastFormula }
+            // - 'splitter': { type, col, row, dir, toggleLeft }
+            // - 'unpacker': { type, col, row, dir, queue, emitTimer, lastSource }
+            // - 'decrementer': { type, col, row, dir }
+            // - 'trash': { type, col, row, dir, count }
+            grid: new Map(),
+
+            // Moving items on belts:
+            // { id, val, col, row, targetCol, targetRow, progress, originDir, labelGlow }
+            items: [],
+            nextItemId: 1,
+
+            // Floating visual popups & particles on canvas
+            popups: [],
+
+            // Tool & Placement state
+            selectedTool: 'belt',
+            selectedDir: 0,          // 0:Right, 1:Down, 2:Left, 3:Up
+            sandboxSpawnVal: null,   // If non-null in Level 8, clicking places an extractor
+            hoverTile: null,         // { col, row }
+            isDraggingPlace: false,
+            isDraggingErase: false,
+            lastDragTile: null,
+
+            // Camera Pan & Zoom
+            camX: 0,
+            camY: 0,
+            zoom: 1,
+            isPanning: false,
+            panStartMouse: { x: 0, y: 0 },
+            panStartCam: { x: 0, y: 0 },
+            keysDown: new Set(),
+
+            // Visual belt chevron animation phase
+            beltAnimPhase: 0,
+            hubPulse: 0,
+            inspectedKey: null
+        };
+
+        /* =========================================================================
+           4. LEVEL INITIALIZATION & GRID HELPERS
+           ========================================================================= */
+        function tileKey(c, r) {
+            return `${c},${r}`;
+        }
+
+        function isHubTile(c, r) {
+            return (c === HUB_COL || c === HUB_COL + 1) && (r === HUB_ROW || r === HUB_ROW + 1);
+        }
+
+        function inBounds(c, r) {
+            return c >= 0 && c < GRID_COLS && r >= 0 && r < GRID_ROWS;
+        }
+
+        function loadLevel(idx) {
+            state.levelIdx = Math.max(0, Math.min(LEVELS.length - 1, idx));
+            const lvl = LEVELS[state.levelIdx];
+
+            state.deliveredCount = 0;
+            state.levelWonShown = false;
+            state.grid.clear();
+            state.items = [];
+            state.popups = [];
+            state.inspectedKey = null;
+            state.sandboxSpawnVal = null;
+            hideInspector();
+            closeWinModal();
+
+            // Place level's initial Number Extractors
+            lvl.extractors.forEach(ext => {
+                state.grid.set(tileKey(ext.col, ext.row), {
+                    type: 'extractor',
+                    col: ext.col,
+                    row: ext.row,
+                    val: ext.val,
+                    dir: ext.dir,
+                    timer: 0.4
+                });
+            });
+
+            // Update HUD & Tool Unlocks
+            document.getElementById('hud-level-num').textContent = lvl.id;
+            document.getElementById('hud-level-title').textContent = lvl.title;
+            document.getElementById('hud-goal-badge').textContent = `Deliver: ${lvl.targetValue}`;
+            document.getElementById('hud-level-desc').textContent = lvl.desc;
+            document.getElementById('formula-pill-text').textContent = lvl.formulaShort;
+            document.getElementById('formula-detail-body').innerHTML = lvl.formulaDetail;
+            updateProgressHUD();
+
+            // Enable/disable dock buttons based on level unlocks
+            const allTools = ['belt', 'multiplier', 'splitter', 'unpacker', 'decrementer', 'trash', 'erase'];
+            allTools.forEach(t => {
+                const btn = document.getElementById(`tool-${t}`);
+                if (btn) {
+                    btn.disabled = !lvl.unlockedTools.includes(t);
+                }
+            });
+
+            // If current selected tool is locked in this level, switch to belt
+            if (!lvl.unlockedTools.includes(state.selectedTool)) {
+                selectTool('belt', true);
+            }
+
+            // Show Sandbox Extractor Spawner only on Level 8
+            const sandboxBar = document.getElementById('sandbox-bar');
+            if (lvl.id === 8) {
+                sandboxBar.classList.remove('hidden');
+                renderSandboxButtons();
+            } else {
+                sandboxBar.classList.add('hidden');
+            }
+
+            centerCameraOnHub();
+        }
+
+        function renderSandboxButtons() {
+            const container = document.getElementById('sandbox-node-buttons');
+            container.innerHTML = '';
+            [0, 1, 2, 3, 4, 5, 6, 7].forEach(val => {
+                const btn = document.createElement('button');
+                const isActive = state.sandboxSpawnVal === val;
+                btn.className = isActive
+                    ? 'px-2.5 py-1 rounded-xl bg-purple-600 text-white font-fredoka font-bold text-xs shadow-xs'
+                    : 'px-2.5 py-1 rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-900 font-fredoka font-bold text-xs';
+                btn.textContent = `[${val}]`;
+                btn.onclick = () => {
+                    playSound('rotate');
+                    state.sandboxSpawnVal = (state.sandboxSpawnVal === val) ? null : val;
+                    renderSandboxButtons();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function updateProgressHUD() {
+            const lvl = LEVELS[state.levelIdx];
+            const pct = Math.min(100, (state.deliveredCount / lvl.targetCount) * 100);
+            document.getElementById('hud-progress-bar').style.width = `${pct}%`;
+            document.getElementById('hud-progress-text').textContent = `${state.deliveredCount} / ${lvl.targetCount}`;
+        }
+
+        function prevLevel() {
+            playSound('rotate');
+            loadLevel(state.levelIdx - 1);
+        }
+
+        function nextLevel() {
+            playSound('rotate');
+            loadLevel(state.levelIdx + 1);
+        }
+
+        function resetCurrentLevelMap() {
+            playSound('erase');
+            loadLevel(state.levelIdx);
+        }
+
+        /* =========================================================================
+           5. TOOLBAR SELECTION, ROTATION & TILE BUILDING
+           ========================================================================= */
+        function selectTool(tool, silent = false) {
+            const lvl = LEVELS[state.levelIdx];
+            if (!lvl.unlockedTools.includes(tool)) return;
+
+            state.selectedTool = tool;
+            state.sandboxSpawnVal = null;
+            if (lvl.id === 8) renderSandboxButtons();
+
+            document.querySelectorAll('.dock-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById(`tool-${tool}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (!silent) playSound('rotate');
+        }
+
+        function rotateSelectedTool() {
+            state.selectedDir = (state.selectedDir + 1) % 4;
+            document.getElementById('dock-dir-arrow').textContent = DIRS[state.selectedDir].arrow;
+            playSound('rotate');
+        }
+
+        function placeOrEditTile(c, r, isDrag = false) {
+            if (!inBounds(c, r) || isHubTile(c, r)) return;
+            const key = tileKey(c, r);
+            const existing = state.grid.get(key);
+
+            // Sandbox Extractor placement
+            if (state.sandboxSpawnVal !== null) {
+                if (existing && existing.type === 'extractor') {
+                    existing.dir = (existing.dir + 1) % 4;
+                    playSound('rotate');
+                    return;
+                }
+                state.grid.set(key, {
+                    type: 'extractor',
+                    col: c,
+                    row: r,
+                    val: state.sandboxSpawnVal,
+                    dir: state.selectedDir,
+                    timer: 0.4
+                });
+                playSound('place');
+                return;
+            }
+
+            // Eraser tool
+            if (state.selectedTool === 'erase') {
+                if (existing && existing.type !== 'extractor') {
+                    state.grid.delete(key);
+                    // Remove any items sitting directly on that tile
+                    state.items = state.items.filter(it => !(it.col === c && it.row === r));
+                    playSound('erase');
+                }
+                return;
+            }
+
+            // Do not overwrite Number Extractors (unless rotating them on single click)
+            if (existing && existing.type === 'extractor') {
+                if (!isDrag) {
+                    existing.dir = (existing.dir + 1) % 4;
+                    playSound('rotate');
+                    inspectTile(c, r);
+                }
+                return;
+            }
+
+            // Auto-orient belt when dragging from previous tile!
+            let placeDir = state.selectedDir;
+            let fromDir = (placeDir + 2) % 4;
+
+            if (isDrag && state.lastDragTile && state.selectedTool === 'belt') {
+                const dc = c - state.lastDragTile.col;
+                const dr = r - state.lastDragTile.row;
+                let dragDir = -1;
+                if (dc === 1 && dr === 0) dragDir = 0;
+                else if (dc === 0 && dr === 1) dragDir = 1;
+                else if (dc === -1 && dr === 0) dragDir = 2;
+                else if (dc === 0 && dr === -1) dragDir = 3;
+
+                if (dragDir !== -1) {
+                    placeDir = dragDir;
+                    fromDir = (dragDir + 2) % 4;
+                    state.selectedDir = dragDir;
+                    document.getElementById('dock-dir-arrow').textContent = DIRS[dragDir].arrow;
+
+                    // Also update the previous belt's output direction so curves connect seamlessly!
+                    const prevKey = tileKey(state.lastDragTile.col, state.lastDragTile.row);
+                    const prevEnt = state.grid.get(prevKey);
+                    if (prevEnt && prevEnt.type === 'belt') {
+                        prevEnt.dir = dragDir;
+                    }
+                }
+            }
+
+            // Create machine or belt entity
+            if (state.selectedTool === 'belt') {
+                state.grid.set(key, {
+                    type: 'belt',
+                    col: c,
+                    row: r,
+                    dir: placeDir,
+                    fromDir: fromDir
+                });
+                playSound('place');
+            } else if (!isDrag) {
+                // Machines are placed on single click (or rotated if clicking same machine type)
+                if (existing && existing.type === state.selectedTool) {
+                    existing.dir = (existing.dir + 1) % 4;
+                    playSound('rotate');
+                    return;
+                }
+
+                const base = { type: state.selectedTool, col: c, row: r, dir: state.selectedDir };
+                if (state.selectedTool === 'multiplier') {
+                    state.grid.set(key, { ...base, slotA: null, slotB: null, animTimer: 0, lastFormula: 'Waiting for 2 inputs' });
+                } else if (state.selectedTool === 'splitter') {
+                    state.grid.set(key, { ...base, toggleLeft: true });
+                } else if (state.selectedTool === 'unpacker') {
+                    state.grid.set(key, { ...base, queue: [], emitTimer: 0, lastSource: null });
+                } else if (state.selectedTool === 'decrementer') {
+                    state.grid.set(key, { ...base });
+                } else if (state.selectedTool === 'trash') {
+                    state.grid.set(key, { ...base, count: 0 });
+                }
+                playSound('place');
+            }
+        }
+
+        function eraseTileAt(c, r) {
+            if (!inBounds(c, r) || isHubTile(c, r)) return;
+            const key = tileKey(c, r);
+            const existing = state.grid.get(key);
+            if (existing && existing.type !== 'extractor') {
+                state.grid.delete(key);
+                state.items = state.items.filter(it => !(it.col === c && it.row === r));
+                playSound('erase');
+            }
+        }
+
+        function clearMovingItems() {
+            state.items = [];
+            state.grid.forEach(ent => {
+                if (ent.type === 'multiplier') {
+                    ent.slotA = null;
+                    ent.slotB = null;
+                } else if (ent.type === 'unpacker') {
+                    ent.queue = [];
+                }
+            });
+            playSound('erase');
+        }
+
+        /* =========================================================================
+           6. FACTORY SIMULATION TICK (EXTRACTORS, BELTS, MACHINES & HUB)
+           ========================================================================= */
+        const SPAWN_INTERVAL = 1.65; // seconds between extractor spawns
+        const ITEM_SPEED = 1.85;     // tiles per second
+
+        function isTileOccupiedByItem(c, r, ignoreItemId = null) {
+            for (let i = 0; i < state.items.length; i++) {
+                const it = state.items[i];
+                if (it.id === ignoreItemId) continue;
+                if ((it.col === c && it.row === r && it.progress < 0.65) ||
+                    (it.targetCol === c && it.targetRow === r && it.progress >= 0.35)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function spawnItemFromTile(c, r, dir, val, glowColor = null) {
+            const d = DIRS[dir];
+            const nc = c + d.dx;
+            const nr = r + d.dy;
+            if (!inBounds(nc, nr)) return false;
+
+            // Check if destination can accept an item
+            if (!canTileAcceptFrom(nc, nr, dir)) return false;
+            if (isTileOccupiedByItem(nc, nr)) return false;
+
+            state.items.push({
+                id: state.nextItemId++,
+                val: val,
+                col: c,
+                row: r,
+                targetCol: nc,
+                targetRow: nr,
+                progress: 0.05,
+                moveDir: dir,
+                glowColor: glowColor
+            });
+            return true;
+        }
+
+        // Determines whether tile (nc, nr) accepts an item moving in direction `incomingDir`
+        function canTileAcceptFrom(nc, nr, incomingDir) {
+            if (isHubTile(nc, nr)) return true;
+            const ent = state.grid.get(tileKey(nc, nr));
+            if (!ent) return false;
+
+            if (ent.type === 'belt') {
+                // Belts accept from any side except head-on opposite direction
+                return incomingDir !== (ent.dir + 2) % 4;
+            }
+            if (ent.type === 'trash') {
+                return true;
+            }
+            if (ent.type === 'splitter' || ent.type === 'unpacker' || ent.type === 'decrementer') {
+                // Single back input: item must move in same direction machine faces
+                return incomingDir === ent.dir;
+            }
+            if (ent.type === 'multiplier') {
+                // Two perpendicular side inputs: Left side of machine or Right side of machine!
+                const leftSideDir = (ent.dir + 1) % 4;  // Item moving clockwise into left port
+                const rightSideDir = (ent.dir + 3) % 4; // Item moving counter-clockwise into right port
+                if (incomingDir === leftSideDir) return ent.slotA === null;
+                if (incomingDir === rightSideDir) return ent.slotB === null;
+                return false;
+            }
+            return false;
+        }
+
+        function updateSimulation(dt) {
+            if (state.isPaused) return;
+
+            state.beltAnimPhase = (state.beltAnimPhase + dt * TILE_SIZE * ITEM_SPEED) % 18;
+            if (state.hubPulse > 0) state.hubPulse = Math.max(0, state.hubPulse - dt * 2.5);
+
+            // 1. Update Extractors & Unpackers
+            state.grid.forEach(ent => {
+                if (ent.type === 'extractor') {
+                    ent.timer -= dt;
+                    if (ent.timer <= 0) {
+                        const spawned = spawnItemFromTile(ent.col, ent.row, ent.dir, ent.val);
+                        ent.timer = spawned ? SPAWN_INTERVAL : 0.35;
+                    }
+                } else if (ent.type === 'unpacker') {
+                    if (ent.queue.length > 0) {
+                        ent.emitTimer -= dt;
+                        if (ent.emitTimer <= 0) {
+                            const nextVal = ent.queue[0];
+                            const spawned = spawnItemFromTile(ent.col, ent.row, ent.dir, nextVal, '#c084fc');
+                            if (spawned) {
+                                ent.queue.shift();
+                                ent.emitTimer = 0.42;
+                            } else {
+                                ent.emitTimer = 0.15;
+                            }
+                        }
+                    }
+                } else if (ent.type === 'multiplier') {
+                    if (ent.animTimer > 0) ent.animTimer = Math.max(0, ent.animTimer - dt);
+                }
+            });
+
+            // 2. Move Items along Belts & Process Machine Arrivals
+            for (let i = state.items.length - 1; i >= 0; i--) {
+                const it = state.items[i];
+                it.progress += dt * ITEM_SPEED;
+
+                if (it.progress >= 1.0) {
+                    // Item reached center of (targetCol, targetRow)
+                    const tc = it.targetCol;
+                    const tr = it.targetRow;
+
+                    // Case A: Reached the Central Hub!
+                    if (isHubTile(tc, tr)) {
+                        handleHubDelivery(it.val, tc, tr);
+                        state.items.splice(i, 1);
+                        continue;
+                    }
+
+                    const ent = state.grid.get(tileKey(tc, tr));
+                    if (!ent) {
+                        // Belt ended — hold item at end of tile until a belt is built
+                        it.progress = 1.0;
+                        continue;
+                    }
+
+                    // Case B: Trash Incinerator
+                    if (ent.type === 'trash') {
+                        ent.count += 1;
+                        addPopup(tc, tr, 'Poof!', '#94a3b8');
+                        state.items.splice(i, 1);
+                        continue;
+                    }
+
+                    // Case C: Multiplier (×)
+                    if (ent.type === 'multiplier') {
+                        const leftSideDir = (ent.dir + 1) % 4;
+                        if (it.moveDir === leftSideDir && ent.slotA === null) {
+                            ent.slotA = it.val;
+                            state.items.splice(i, 1);
+                        } else if (ent.slotB === null) {
+                            ent.slotB = it.val;
+                            state.items.splice(i, 1);
+                        } else {
+                            it.progress = 1.0;
+                            continue;
+                        }
+
+                        // If both inputs are ready, multiply and emit!
+                        if (ent.slotA !== null && ent.slotB !== null) {
+                            const prod = ent.slotA * ent.slotB;
+                            const formula = `${ent.slotA} × ${ent.slotB} = ${prod}`;
+                            ent.lastFormula = formula;
+                            ent.animTimer = 0.6;
+                            const spawned = spawnItemFromTile(tc, tr, ent.dir, prod, '#14b8a6');
+                            if (spawned) {
+                                addPopup(tc, tr, formula, '#0d9488');
+                                playSound('multiply');
+                                ent.slotA = null;
+                                ent.slotB = null;
+                            }
+                        }
+                        continue;
+                    }
+
+                    // Case D: Factorial Unpacker (n!)
+                    if (ent.type === 'unpacker') {
+                        if (ent.queue.length === 0) {
+                            const n = Math.max(0, Math.min(8, Math.floor(it.val)));
+                            ent.lastSource = n;
+                            if (n === 0) {
+                                // Special 0! = 1 rule!
+                                ent.queue = [1];
+                                addPopup(tc, tr, '0! ➔ 1', '#9333ea');
+                            } else {
+                                const seq = [];
+                                for (let k = n; k >= 1; k--) seq.push(k);
+                                ent.queue = seq;
+                                addPopup(tc, tr, `${n}! ➔ ${seq.join('·')}`, '#9333ea');
+                            }
+                            ent.emitTimer = 0.05;
+                            playSound('multiply');
+                            state.items.splice(i, 1);
+                        } else {
+                            it.progress = 1.0;
+                        }
+                        continue;
+                    }
+
+                    // Case E: Decrementer (-1)
+                    if (ent.type === 'decrementer') {
+                        const nextVal = Math.max(1, it.val - 1);
+                        const spawned = spawnItemFromTile(tc, tr, ent.dir, nextVal, '#f59e0b');
+                        if (spawned) {
+                            addPopup(tc, tr, `${it.val}-1=${nextVal}`, '#d97706');
+                            playSound('multiply');
+                            state.items.splice(i, 1);
+                        } else {
+                            it.progress = 1.0;
+                        }
+                        continue;
+                    }
+
+                    // Case F: Splitter (⑂) — Alternates between Left (-90 deg) and Right (+90 deg) outputs
+                    if (ent.type === 'splitter') {
+                        const leftOutDir = (ent.dir + 3) % 4;
+                        const rightOutDir = (ent.dir + 1) % 4;
+                        const firstTry = ent.toggleLeft ? leftOutDir : rightOutDir;
+                        const secondTry = ent.toggleLeft ? rightOutDir : leftOutDir;
+
+                        let routed = spawnItemFromTile(tc, tr, firstTry, it.val, it.glowColor);
+                        if (!routed) {
+                            routed = spawnItemFromTile(tc, tr, secondTry, it.val, it.glowColor);
+                        }
+                        if (routed) {
+                            ent.toggleLeft = !ent.toggleLeft;
+                            state.items.splice(i, 1);
+                        } else {
+                            it.progress = 1.0;
+                        }
+                        continue;
+                    }
+
+                    // Case G: Conveyor Belt — Advance to next tile along belt's direction
+                    if (ent.type === 'belt') {
+                        const outDir = ent.dir;
+                        const d = DIRS[outDir];
+                        const nextC = tc + d.dx;
+                        const nextR = tr + d.dy;
+
+                        if (inBounds(nextC, nextR) && canTileAcceptFrom(nextC, nextR, outDir) && !isTileOccupiedByItem(nextC, nextR, it.id)) {
+                            it.col = tc;
+                            it.row = tr;
+                            it.targetCol = nextC;
+                            it.targetRow = nextR;
+                            it.moveDir = outDir;
+                            it.progress -= 1.0;
+                        } else {
+                            it.progress = 1.0;
+                        }
+                    }
+                }
+            }
+
+            // 3. Update Floating Canvas Popups
+            for (let i = state.popups.length - 1; i >= 0; i--) {
+                const p = state.popups[i];
+                p.y -= dt * 26;
+                p.life -= dt;
+                if (p.life <= 0) state.popups.splice(i, 1);
+            }
+        }
+
+        function handleHubDelivery(val, col, row) {
+            const lvl = LEVELS[state.levelIdx];
+            state.hubPulse = 1.0;
+
+            if (val === lvl.targetValue) {
+                state.deliveredCount += 1;
+                updateProgressHUD();
+                addPopup(col, row, `+1 (${val} ✓)`, '#16a34a');
+                playSound('deliver');
+
+                if (state.deliveredCount >= lvl.targetCount && !state.levelWonShown) {
+                    state.levelWonShown = true;
+                    triggerLevelComplete(lvl);
+                }
+            } else {
+                addPopup(col, row, `Got ${val} (Need ${lvl.targetValue})`, '#e11d48');
+                playSound('erase');
+            }
+        }
+
+        function triggerLevelComplete(lvl) {
+            playSound('win');
+            if (typeof confetti === 'function') {
+                confetti({ particleCount: 75, spread: 80, origin: { y: 0.55 } });
+            }
+
+            document.getElementById('win-modal-title').textContent = `🎉 Level ${lvl.id} Complete!`;
+            document.getElementById('win-modal-summary').textContent = `Awesome automation! You delivered ${lvl.targetCount} × [${lvl.targetValue}] (${lvl.formulaShort}) to the Hub!`;
+
+            const unlockBox = document.getElementById('win-unlock-box');
+            if (lvl.unlockBanner) {
+                unlockBox.textContent = `🔓 ${lvl.unlockBanner}`;
+                unlockBox.classList.remove('hidden');
+            } else {
+                unlockBox.classList.add('hidden');
+            }
+
+            document.getElementById('level-complete-modal').classList.remove('hidden');
+        }
+
+        function closeWinModal() {
+            document.getElementById('level-complete-modal').classList.add('hidden');
+        }
+
+        function advanceAfterWin() {
+            closeWinModal();
+            if (state.levelIdx < LEVELS.length - 1) {
+                loadLevel(state.levelIdx + 1);
+            } else {
+                loadLevel(0);
+            }
+        }
+
+        function addPopup(col, row, text, color) {
+            state.popups.push({
+                x: (col + 0.5) * TILE_SIZE,
+                y: (row + 0.2) * TILE_SIZE,
+                text,
+                color,
+                life: 0.95
+            });
+        }
+
+        /* =========================================================================
+           7. 2D CANVAS RENDERER (BELTMATIC / SHAPEZ VECTOR GRAPHICS)
+           ========================================================================= */
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let cw = window.innerWidth;
+        let ch = window.innerHeight;
+        let dpr = 1;
+
+        function resizeCanvas() {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            cw = window.innerWidth;
+            ch = window.innerHeight;
+            canvas.width = Math.floor(cw * dpr);
+            canvas.height = Math.floor(ch * dpr);
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+        function centerCameraOnHub() {
+            const hubCenterX = (HUB_COL + 1) * TILE_SIZE;
+            const hubCenterY = (HUB_ROW + 1) * TILE_SIZE;
+            state.camX = cw / 2 - hubCenterX * state.zoom;
+            state.camY = ch / 2 - hubCenterY * state.zoom;
+        }
+
+        function adjustZoom(delta, pivotX = cw / 2, pivotY = ch / 2) {
+            const oldZoom = state.zoom;
+            const newZoom = Math.max(0.55, Math.min(1.85, oldZoom + delta));
+            if (newZoom === oldZoom) return;
+
+            const worldX = (pivotX - state.camX) / oldZoom;
+            const worldY = (pivotY - state.camY) / oldZoom;
+            state.zoom = newZoom;
+            state.camX = pivotX - worldX * newZoom;
+            state.camY = pivotY - worldY * newZoom;
+        }
+
+        function screenToGrid(sx, sy) {
+            const wx = (sx - state.camX) / state.zoom;
+            const wy = (sy - state.camY) / state.zoom;
+            return {
+                col: Math.floor(wx / TILE_SIZE),
+                row: Math.floor(wy / TILE_SIZE)
+            };
+        }
+
+        function renderGame() {
+            ctx.save();
+            ctx.scale(dpr, dpr);
+
+            // 1. Clean Light-Blueprint Background
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, cw, ch);
+
+            ctx.translate(state.camX, state.camY);
+            ctx.scale(state.zoom, state.zoom);
+
+            // 2. Grid Floor & Subtle Coordinates
+            drawGridFloor();
+
+            // 3. Placed Conveyor Belts
+            state.grid.forEach(ent => {
+                if (ent.type === 'belt') drawBeltTile(ent);
+            });
+
+            // 4. Central Delivery Hub (2x2)
+            drawCentralHub();
+
+            // 5. Placed Factory Machines & Number Extractors
+            state.grid.forEach(ent => {
+                if (ent.type !== 'belt') drawMachineTile(ent);
+            });
+
+            // 6. Moving Number Tokens on Belts
+            drawMovingItems();
+
+            // 7. Ghost Placement Preview under Cursor
+            if (state.hoverTile && inBounds(state.hoverTile.col, state.hoverTile.row)) {
+                drawGhostPreview(state.hoverTile.col, state.hoverTile.row);
+            }
+
+            // 8. Floating Formula Popups
+            drawFloatingPopups();
+
+            ctx.restore();
+        }
+
+        function drawGridFloor() {
+            const mapW = GRID_COLS * TILE_SIZE;
+            const mapH = GRID_ROWS * TILE_SIZE;
+
+            // Main factory floor plate
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, mapW, mapH);
+
+            // Grid lines
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let c = 0; c <= GRID_COLS; c++) {
+                ctx.moveTo(c * TILE_SIZE, 0);
+                ctx.lineTo(c * TILE_SIZE, mapH);
+            }
+            for (let r = 0; r <= GRID_ROWS; r++) {
+                ctx.moveTo(0, r * TILE_SIZE);
+                ctx.lineTo(mapW, r * TILE_SIZE);
+            }
+            ctx.stroke();
+
+            // Outer factory border
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(0, 0, mapW, mapH);
+        }
+
+        function drawBeltTile(ent) {
+            const x = ent.col * TILE_SIZE;
+            const y = ent.row * TILE_SIZE;
+            const cx = x + TILE_SIZE / 2;
+            const cy = y + TILE_SIZE / 2;
+
+            // Check if a neighbor feeds into this belt to draw smooth curved corner
+            let incomingDir = -1;
+            for (let d = 0; d < 4; d++) {
+                if (d === ent.dir) continue;
+                const nc = ent.col - DIRS[d].dx;
+                const nr = ent.row - DIRS[d].dy;
+                const neighbor = state.grid.get(tileKey(nc, nr));
+                if (neighbor && neighbor.dir === d && neighbor.type !== 'trash') {
+                    incomingDir = d;
+                    break;
+                }
+            }
+
+            ctx.save();
+            // Belt track base
+            ctx.fillStyle = '#e2e8f0';
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1.5;
+
+            if (incomingDir !== -1 && incomingDir !== ent.dir) {
+                // Curved L-belt from incoming side to outgoing side
+                const entrySide = (incomingDir + 2) % 4;
+                const exitSide = ent.dir;
+                const entryPt = sideMidpoint(cx, cy, entrySide, TILE_SIZE / 2);
+                const exitPt = sideMidpoint(cx, cy, exitSide, TILE_SIZE / 2);
+
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 34;
+                ctx.lineCap = 'butt';
+                ctx.beginPath();
+                ctx.moveTo(entryPt.x, entryPt.y);
+                ctx.quadraticCurveTo(cx, cy, exitPt.x, exitPt.y);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#f1f5f9';
+                ctx.lineWidth = 28;
+                ctx.stroke();
+
+                // Directional chevron at exit
+                drawChevron(cx, cy, DIRS[ent.dir].angle, '#64748b');
+            } else {
+                // Straight belt
+                ctx.translate(cx, cy);
+                ctx.rotate(DIRS[ent.dir].angle);
+                ctx.fillStyle = '#e2e8f0';
+                ctx.fillRect(-TILE_SIZE / 2, -17, TILE_SIZE, 34);
+                ctx.fillStyle = '#f1f5f9';
+                ctx.fillRect(-TILE_SIZE / 2, -14, TILE_SIZE, 28);
+
+                // Animated moving chevrons
+                ctx.beginPath();
+                ctx.rect(-TILE_SIZE / 2, -14, TILE_SIZE, 28);
+                ctx.clip();
+                for (let ox = -TILE_SIZE + state.beltAnimPhase; ox < TILE_SIZE; ox += 18) {
+                    drawChevron(ox, 0, 0, '#94a3b8');
+                }
+            }
+            ctx.restore();
+        }
+
+        function sideMidpoint(cx, cy, dir, half) {
+            if (dir === 0) return { x: cx + half, y: cy };
+            if (dir === 1) return { x: cx, y: cy + half };
+            if (dir === 2) return { x: cx - half, y: cy };
+            return { x: cx, y: cy - half };
+        }
+
+        function drawChevron(x, y, angle, color) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(-4, -6);
+            ctx.lineTo(3, 0);
+            ctx.lineTo(-4, 6);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function drawCentralHub() {
+            const x = HUB_COL * TILE_SIZE;
+            const y = HUB_ROW * TILE_SIZE;
+            const size = TILE_SIZE * 2;
+            const cx = x + size / 2;
+            const cy = y + size / 2;
+            const lvl = LEVELS[state.levelIdx];
+
+            ctx.save();
+            // Pulse aura when receiving correct number
+            if (state.hubPulse > 0) {
+                ctx.fillStyle = `rgba(34, 197, 94, ${state.hubPulse * 0.25})`;
+                roundRect(ctx, x - 8, y - 8, size + 16, size + 16, 22, true, false);
+            }
+
+            // Hub Chassis
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 4;
+            roundRect(ctx, x + 3, y + 3, size - 6, size - 6, 18, true, true);
+
+            // Inner Screen
+            ctx.fillStyle = '#1e293b';
+            roundRect(ctx, x + 12, y + 12, size - 24, size - 24, 12, true, false);
+
+            // Label & Target Value
+            ctx.fillStyle = '#38bdf8';
+            ctx.font = '800 11px Nunito, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('HUB GOAL', cx, y + 30);
+
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '700 28px Fredoka, sans-serif';
+            ctx.fillText(`${lvl.targetValue}`, cx, y + 60);
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '700 12px Fredoka, sans-serif';
+            ctx.fillText(`${state.deliveredCount}/${lvl.targetCount}`, cx, y + 82);
+            ctx.restore();
+        }
+
+        function drawMachineTile(ent) {
+            const x = ent.col * TILE_SIZE;
+            const y = ent.row * TILE_SIZE;
+            const cx = x + TILE_SIZE / 2;
+            const cy = y + TILE_SIZE / 2;
+
+            ctx.save();
+
+            // 1. Number Extractor Node
+            if (ent.type === 'extractor') {
+                // Resource patch background
+                ctx.fillStyle = '#dcfce7';
+                roundRect(ctx, x + 3, y + 3, TILE_SIZE - 6, TILE_SIZE - 6, 14, true, false);
+
+                // Extractor body
+                ctx.fillStyle = '#16a34a';
+                ctx.strokeStyle = '#14532d';
+                ctx.lineWidth = 3;
+                roundRect(ctx, x + 7, y + 7, TILE_SIZE - 14, TILE_SIZE - 14, 12, true, true);
+
+                // Output port indicator arrow
+                drawPortArrow(cx, cy, ent.dir, '#fbbf24', true);
+
+                // Number value
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 21px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${ent.val}`, cx, cy + 7);
+            }
+
+            // 2. Multiplier (×)
+            else if (ent.type === 'multiplier') {
+                const scale = ent.animTimer > 0 ? 1 + Math.sin(ent.animTimer * 18) * 0.06 : 1;
+                ctx.translate(cx, cy);
+                ctx.scale(scale, scale);
+                ctx.translate(-cx, -cy);
+
+                ctx.fillStyle = '#0d9488';
+                ctx.strokeStyle = '#134e4a';
+                ctx.lineWidth = 3;
+                roundRect(ctx, x + 5, y + 5, TILE_SIZE - 10, TILE_SIZE - 10, 13, true, true);
+
+                // Two side input arrows (blue) & front output arrow (amber)
+                const leftIn = (ent.dir + 3) % 4;
+                const rightIn = (ent.dir + 1) % 4;
+                drawPortArrow(cx, cy, leftIn, '#38bdf8', false);
+                drawPortArrow(cx, cy, rightIn, '#38bdf8', false);
+                drawPortArrow(cx, cy, ent.dir, '#fbbf24', true);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 24px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('×', cx, cy + 8);
+
+                // Small indicator dot if one input is buffered
+                if (ent.slotA !== null || ent.slotB !== null) {
+                    const buffered = ent.slotA !== null ? ent.slotA : ent.slotB;
+                    ctx.fillStyle = '#fef08a';
+                    ctx.font = '800 10px Nunito, sans-serif';
+                    ctx.fillText(`[${buffered}]`, cx, y + TILE_SIZE - 9);
+                }
+            }
+
+            // 3. Splitter (⑂)
+            else if (ent.type === 'splitter') {
+                ctx.fillStyle = '#0284c7';
+                ctx.strokeStyle = '#0c4a6e';
+                ctx.lineWidth = 3;
+                roundRect(ctx, x + 5, y + 5, TILE_SIZE - 10, TILE_SIZE - 10, 13, true, true);
+
+                const backIn = (ent.dir + 2) % 4;
+                const leftOut = (ent.dir + 3) % 4;
+                const rightOut = (ent.dir + 1) % 4;
+                drawPortArrow(cx, cy, backIn, '#38bdf8', false);
+                drawPortArrow(cx, cy, leftOut, '#fbbf24', true);
+                drawPortArrow(cx, cy, rightOut, '#fbbf24', true);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 22px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('⑂', cx, cy + 8);
+            }
+
+            // 4. Factorial Unpacker (n!)
+            else if (ent.type === 'unpacker') {
+                ctx.fillStyle = '#9333ea';
+                ctx.strokeStyle = '#581c87';
+                ctx.lineWidth = 3;
+                roundRect(ctx, x + 5, y + 5, TILE_SIZE - 10, TILE_SIZE - 10, 13, true, true);
+
+                const backIn = (ent.dir + 2) % 4;
+                drawPortArrow(cx, cy, backIn, '#38bdf8', false);
+                drawPortArrow(cx, cy, ent.dir, '#fbbf24', true);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '700 20px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('n!', cx, cy + 7);
+            }
+
+            // 5. Decrementer (-1)
+            else if (ent.type === 'decrementer') {
+                ctx.fillStyle = '#f59e0b';
+                ctx.strokeStyle = '#78350f';
+                ctx.lineWidth = 3;
+                roundRect(ctx, x + 5, y + 5, TILE_SIZE - 10, TILE_SIZE - 10, 13, true, true);
+
+                const backIn = (ent.dir + 2) % 4;
+                drawPortArrow(cx, cy, backIn, '#38bdf8', false);
+                drawPortArrow(cx, cy, ent.dir, '#ffffff', true);
+
+                ctx.fillStyle = '#1e293b';
+                ctx.font = '700 19px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('-1', cx, cy + 7);
+            }
+
+            // 6. Trash Incinerator
+            else if (ent.type === 'trash') {
+                ctx.fillStyle = '#475569';
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 3;
+                roundRect(ctx, x + 6, y + 6, TILE_SIZE - 12, TILE_SIZE - 12, 13, true, true);
+
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = '18px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('🗑️', cx, cy + 6);
+            }
+
+            ctx.restore();
+        }
+
+        function drawPortArrow(cx, cy, sideDir, color, isOutput) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(DIRS[sideDir].angle);
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            if (isOutput) {
+                // Outward-pointing triangle on edge
+                ctx.moveTo(TILE_SIZE / 2 - 1, 0);
+                ctx.lineTo(TILE_SIZE / 2 - 8, -5);
+                ctx.lineTo(TILE_SIZE / 2 - 8, 5);
+            } else {
+                // Inward-pointing triangle on edge
+                ctx.moveTo(TILE_SIZE / 2 - 8, 0);
+                ctx.lineTo(TILE_SIZE / 2 - 1, -5);
+                ctx.lineTo(TILE_SIZE / 2 - 1, 5);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawMovingItems() {
+            state.items.forEach(it => {
+                const startX = (it.col + 0.5) * TILE_SIZE;
+                const startY = (it.row + 0.5) * TILE_SIZE;
+                const endX = (it.targetCol + 0.5) * TILE_SIZE;
+                const endY = (it.targetRow + 0.5) * TILE_SIZE;
+
+                const t = Math.min(1, it.progress);
+                const x = startX + (endX - startX) * t;
+                const y = startY + (endY - startY) * t;
+
+                ctx.save();
+                // Token badge
+                const radius = it.val >= 100 ? 16 : 14;
+                ctx.fillStyle = it.glowColor || '#0f172a';
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Number text
+                ctx.fillStyle = '#ffffff';
+                const fontSize = it.val >= 100 ? 11 : 13;
+                ctx.font = `700 ${fontSize}px Fredoka, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(`${it.val}`, x, y + 4.5);
+                ctx.restore();
+            });
+        }
+
+        function drawGhostPreview(c, r) {
+            if (isHubTile(c, r)) return;
+            const x = c * TILE_SIZE;
+            const y = r * TILE_SIZE;
+            const cx = x + TILE_SIZE / 2;
+            const cy = y + TILE_SIZE / 2;
+
+            ctx.save();
+            ctx.globalAlpha = 0.65;
+
+            if (state.selectedTool === 'erase') {
+                ctx.fillStyle = 'rgba(244, 63, 94, 0.25)';
+                ctx.strokeStyle = '#e11d48';
+                ctx.lineWidth = 2.5;
+                roundRect(ctx, x + 3, y + 3, TILE_SIZE - 6, TILE_SIZE - 6, 10, true, true);
+                ctx.restore();
+                return;
+            }
+
+            ctx.fillStyle = 'rgba(14, 165, 233, 0.22)';
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineWidth = 2.5;
+            roundRect(ctx, x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8, 12, true, true);
+
+            // Direction arrow preview
+            drawPortArrow(cx, cy, state.selectedDir, '#0284c7', true);
+
+            if (state.selectedTool === 'multiplier') {
+                drawPortArrow(cx, cy, (state.selectedDir + 3) % 4, '#38bdf8', false);
+                drawPortArrow(cx, cy, (state.selectedDir + 1) % 4, '#38bdf8', false);
+            } else if (state.selectedTool !== 'belt' && state.selectedTool !== 'trash' && state.sandboxSpawnVal === null) {
+                drawPortArrow(cx, cy, (state.selectedDir + 2) % 4, '#38bdf8', false);
+            }
+
+            ctx.restore();
+        }
+
+        function drawFloatingPopups() {
+            state.popups.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = Math.min(1, p.life * 1.4);
+                ctx.font = '700 13px Fredoka, sans-serif';
+                ctx.textAlign = 'center';
+                const w = ctx.measureText(p.text).width + 14;
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = 2;
+                roundRect(ctx, p.x - w / 2, p.y - 12, w, 20, 8, true, true);
+                ctx.fillStyle = p.color;
+                ctx.fillText(p.text, p.x, p.y + 2.5);
+                ctx.restore();
+            });
+        }
+
+        function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            if (fill) ctx.fill();
+            if (stroke) ctx.stroke();
+        }
+
+        /* =========================================================================
+           8. POINTER, KEYBOARD & INSPECTOR INTERACTIONS
+           ========================================================================= */
+        canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+        canvas.addEventListener('pointerdown', (e) => {
+            canvas.setPointerCapture(e.pointerId);
+            const tile = screenToGrid(e.clientX, e.clientY);
+            state.hoverTile = tile;
+
+            // Middle click or Space+Left click -> Pan camera
+            if (e.button === 1 || (e.button === 0 && state.keysDown.has('Space'))) {
+                state.isPanning = true;
+                state.panStartMouse = { x: e.clientX, y: e.clientY };
+                state.panStartCam = { x: state.camX, y: state.camY };
+                return;
+            }
+
+            // Right click -> Erase
+            if (e.button === 2) {
+                state.isDraggingErase = true;
+                eraseTileAt(tile.col, tile.row);
+                return;
+            }
+
+            // Left click -> Place / Drag Belt / Inspect
+            if (e.button === 0) {
+                state.isDraggingPlace = true;
+                placeOrEditTile(tile.col, tile.row, false);
+                state.lastDragTile = tile;
+                inspectTile(tile.col, tile.row);
+            }
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            const tile = screenToGrid(e.clientX, e.clientY);
+            state.hoverTile = tile;
+
+            if (state.isPanning) {
+                state.camX = state.panStartCam.x + (e.clientX - state.panStartMouse.x);
+                state.camY = state.panStartCam.y + (e.clientY - state.panStartMouse.y);
+                return;
+            }
+
+            if (state.isDraggingErase) {
+                eraseTileAt(tile.col, tile.row);
+                return;
+            }
+
+            if (state.isDraggingPlace) {
+                if (!state.lastDragTile || state.lastDragTile.col !== tile.col || state.lastDragTile.row !== tile.row) {
+                    placeOrEditTile(tile.col, tile.row, true);
+                    state.lastDragTile = tile;
+                }
+            }
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            state.isPanning = false;
+            state.isDraggingPlace = false;
+            state.isDraggingErase = false;
+            state.lastDragTile = null;
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY < 0 ? 0.12 : -0.12;
+            adjustZoom(delta, e.clientX, e.clientY);
+        }, { passive: false });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            state.keysDown.add(e.code);
+
+            if (e.key === '1') selectTool('belt');
+            else if (e.key === '2') selectTool('multiplier');
+            else if (e.key === '3') selectTool('splitter');
+            else if (e.key === '4') selectTool('unpacker');
+            else if (e.key === '5') selectTool('decrementer');
+            else if (e.key === '6') selectTool('trash');
+            else if (e.key.toLowerCase() === 'e') selectTool('erase');
+            else if (e.key.toLowerCase() === 'r') rotateSelectedTool();
+            else if (e.key.toLowerCase() === 'x') clearMovingItems();
+            else if (e.key.toLowerCase() === 'h') centerCameraOnHub();
+            else if (e.code === 'Space') {
+                e.preventDefault();
+                togglePause();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            state.keysDown.delete(e.code);
+        });
+
+        function updateKeyboardPan(dt) {
+            const panSpeed = 460 * dt;
+            if (state.keysDown.has('KeyW') || state.keysDown.has('ArrowUp')) state.camY += panSpeed;
+            if (state.keysDown.has('KeyS') || state.keysDown.has('ArrowDown')) state.camY -= panSpeed;
+            if (state.keysDown.has('KeyA') || state.keysDown.has('ArrowLeft')) state.camX += panSpeed;
+            if (state.keysDown.has('KeyD') || state.keysDown.has('ArrowRight')) state.camX -= panSpeed;
+        }
+
+        /* =========================================================================
+           9. INSPECTOR, FORMULA OVERLAY & MODAL CONTROLS
+           ========================================================================= */
+        function inspectTile(c, r) {
+            const ent = state.grid.get(tileKey(c, r));
+            if (!ent) return;
+
+            const card = document.getElementById('inspector-card');
+            const icon = document.getElementById('insp-icon');
+            const title = document.getElementById('insp-title');
+            const desc = document.getElementById('insp-desc');
+            const st = document.getElementById('insp-state');
+
+            if (ent.type === 'extractor') {
+                icon.textContent = '🟢';
+                title.textContent = `Number Extractor [${ent.val}]`;
+                desc.textContent = 'Continuously spawns raw numbers onto connected Conveyor Belts. Click to rotate output!';
+                st.textContent = `Spawning: ${ent.val} (${DIRS[ent.dir].arrow})`;
+            } else if (ent.type === 'multiplier') {
+                icon.textContent = '✖️';
+                title.textContent = 'Multiplier Machine (×)';
+                desc.textContent = 'Waits for 1 number on each blue side input, multiplies A × B, and outputs the product.';
+                st.textContent = `Last: ${ent.lastFormula}`;
+            } else if (ent.type === 'unpacker') {
+                icon.textContent = '❗';
+                title.textContent = 'Factorial Unpacker (n!)';
+                desc.textContent = 'Takes n and streams n, n-1, ..., 1 sequentially! Turns 0 into 1 (0! = 1).';
+                st.textContent = ent.lastSource !== null ? `Last Expanded: ${ent.lastSource}!` : 'Ready for input n';
+            } else if (ent.type === 'splitter') {
+                icon.textContent = '⑂';
+                title.textContent = 'Alternating Splitter';
+                desc.textContent = 'Splits an incoming stream evenly between left and right outputs.';
+                st.textContent = `Next Output: ${ent.toggleLeft ? 'Left Branch' : 'Right Branch'}`;
+            } else if (ent.type === 'decrementer') {
+                icon.textContent = '➖';
+                title.textContent = 'Minus 1 (-1) Machine';
+                desc.textContent = 'Subtracts 1 from each incoming number (stops at 1) to build countdown chains.';
+                st.textContent = 'Operation: n ➔ n - 1';
+            } else {
+                return;
+            }
+            card.classList.remove('hidden');
+        }
+
+        function hideInspector() {
+            document.getElementById('inspector-card').classList.add('hidden');
+        }
+
+        function toggleFormulaCard() {
+            playSound('rotate');
+            document.getElementById('formula-overlay-card').classList.toggle('hidden');
+        }
+
+        function togglePause() {
+            state.isPaused = !state.isPaused;
+            document.getElementById('pause-icon').textContent = state.isPaused ? '▶️' : '⏸️';
+            document.getElementById('pause-label').textContent = state.isPaused ? 'Resume' : 'Pause';
+            playSound('rotate');
+        }
+
+        function openHelpModal() {
+            playSound('rotate');
+            document.getElementById('help-modal').classList.remove('hidden');
+        }
+
+        function closeHelpModal() {
+            playSound('rotate');
+            document.getElementById('help-modal').classList.add('hidden');
+        }
+
+        function closeHelpOnBackdrop(e) {
+            if (e.target.id === 'help-modal') closeHelpModal();
+        }
+
+        /* =========================================================================
+           10. MAIN 60FPS ANIMATION LOOP
+           ========================================================================= */
+        let lastTime = 0;
+        function mainLoop(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+            lastTime = timestamp;
+
+            updateKeyboardPan(dt);
+            updateSimulation(dt);
+            renderGame();
+
+            requestAnimationFrame(mainLoop);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            loadLevel(0);
+            requestAnimationFrame(mainLoop);
+        };
+    </script>
+</body>
+</html>
