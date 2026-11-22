@@ -50,12 +50,16 @@
                     <p class="feedback"></p>
                 </div>
 
-                <div class="exercise" id="energy-calculator">
-                    <h3>Interactive Exercise: Energy Calculator</h3>
-                    <p>Enter a mass in kilograms to see how much energy it equals using E = mc².</p>
-                    <input type="number" step="any" class="mass-input" placeholder="Mass in kg">
-                    <button class="calc-energy">Calculate Energy</button>
-                    <p class="energy-result"></p>
+                <div class="exercise memory-test" id="emc2-memory-test">
+                    <h3>🧠 Memory Test: Remember E = mc²</h3>
+                    <p><strong>Study card:</strong> Energy equals mass multiplied by the speed of light squared.</p>
+                    <p class="memory-formula"><code>E = m × c²</code></p>
+                    <p id="memory-question">Question 1: What does <strong>E</strong> stand for?</p>
+                    <div class="memory-options" id="memory-options"></div>
+                    <p id="memory-feedback" class="exercise-feedback" role="status"></p>
+                    <p class="game-score">Memory score: <span id="memory-score">0</span> / 3</p>
+                    <button class="game-button" id="memory-next" style="display:none;">Next Question</button>
+                    <button class="game-button" id="memory-restart" style="display:none;">Practice Again</button>
                 </div>
 
                 <div class="visual-box">

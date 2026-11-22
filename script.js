@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initLogVisualizer();
     initFactorialVisualizer();
     initEnergyVisualizer();
+    initEmc2MemoryTest();
     initPowerVisualizer();
     initTowerVisualizer();
     initSqrtVisualizer();
@@ -475,6 +476,102 @@ function initEnergyVisualizer() {
 
     slider.addEventListener('input', update);
     update();
+}
+
+function initEmc2MemoryTest() {
+    const test = document.getElementById('emc2-memory-test');
+    if (!test) return;
+
+    const questionEl = document.getElementById('memory-question');
+    const optionsEl = document.getElementById('memory-options');
+    const feedbackEl = document.getElementById('memory-feedback');
+    const scoreEl = document.getElementById('memory-score');
+    const nextBtn = document.getElementById('memory-next');
+    const restartBtn = document.getElementById('memory-restart');
+
+    const questions = [
+        {
+            question: 'What does E stand for?',
+            answers: ['Energy', 'Edges', 'Exponent'],
+            correct: 'Energy'
+        },
+        {
+            question: 'What does m stand for?',
+            answers: ['Meters', 'Mass', 'Motion'],
+            correct: 'Mass'
+        },
+        {
+            question: 'What does c stand for?',
+            answers: ['Circle', 'Current', 'Speed of light'],
+            correct: 'Speed of light'
+        }
+    ];
+
+    let questionIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    function showQuestion() {
+        const current = questions[questionIndex];
+        answered = false;
+        questionEl.innerHTML = `Question ${questionIndex + 1} of 3: <strong>${current.question}</strong>`;
+        optionsEl.innerHTML = '';
+        feedbackEl.textContent = '';
+        feedbackEl.className = 'exercise-feedback';
+        nextBtn.style.display = 'none';
+        restartBtn.style.display = 'none';
+
+        current.answers.forEach(answer => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'memory-option';
+            button.textContent = answer;
+            button.addEventListener('click', () => answerQuestion(button, answer, current.correct));
+            optionsEl.appendChild(button);
+        });
+    }
+
+    function answerQuestion(button, answer, correct) {
+        if (answered) return;
+        answered = true;
+        optionsEl.querySelectorAll('button').forEach(option => option.disabled = true);
+
+        if (answer === correct) {
+            score++;
+            button.classList.add('correct');
+            feedbackEl.textContent = '✅ Correct! Say the formula out loud: E = m c squared.';
+            feedbackEl.className = 'exercise-feedback correct';
+        } else {
+            button.classList.add('wrong');
+            feedbackEl.textContent = `Not quite. Remember: ${correct}.`;
+            feedbackEl.className = 'exercise-feedback wrong';
+            optionsEl.querySelectorAll('button').forEach(option => {
+                if (option.textContent === correct) option.classList.add('correct');
+            });
+        }
+
+        scoreEl.textContent = score;
+        if (questionIndex < questions.length - 1) {
+            nextBtn.style.display = 'inline-block';
+        } else {
+            restartBtn.style.display = 'inline-block';
+            feedbackEl.textContent += ` Final score: ${score} / 3.`;
+        }
+    }
+
+    nextBtn.addEventListener('click', () => {
+        questionIndex++;
+        showQuestion();
+    });
+
+    restartBtn.addEventListener('click', () => {
+        questionIndex = 0;
+        score = 0;
+        scoreEl.textContent = '0';
+        showQuestion();
+    });
+
+    showQuestion();
 }
 
 function initPowerVisualizer() {
