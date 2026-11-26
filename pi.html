@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math — Pi & Circles</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <div class="breadcrumb">
+                <span>Numbers & Operations</span> / <span>Pi & Circles</span>
+            </div>
+
+            <h2>🔵 Pi &amp; Circles: From Radius to Waves</h2>
+            <p>Circles are everywhere — wheels, pizzas, clocks, planets! In this lesson you will learn the <strong>radius</strong>, the <strong>diameter</strong>, the <strong>circumference</strong>, the famous number <strong>π (pi)</strong>, and the amazing <strong>Fourier technique</strong> that turns spinning circles into waves.</p>
+
+            <h3>🧗 The Radius</h3>
+            <p>The <strong>radius</strong> is the distance from the <strong>center</strong> of a circle to its edge.</p>
+            <p>Think of it as a rope tied to a post: the rope's length is the radius!</p>
+            <div class="example-grid">
+                <div class="example-card">Radius = center ➡️ edge</div>
+                <div class="example-card">A pizza with radius 10 cm is 10 cm from center to crust</div>
+            </div>
+
+            <h3>📏 The Diameter</h3>
+            <p>The <strong>diameter</strong> is the distance <strong>across</strong> a circle, passing through the center.</p>
+            <p>It is exactly <strong>two radii</strong> stuck together!</p>
+            <div class="example-grid">
+                <div class="example-card">Diameter = radius × 2</div>
+                <div class="example-card">d = 2 × r</div>
+            </div>
+
+            <h3>🥁 The Circumference</h3>
+            <p>The <strong>circumference</strong> is the distance <strong>all the way around</strong> a circle — its perimeter.</p>
+            <p>Imagine walking around a circular track: the distance you walk is the circumference.</p>
+            <div class="example-grid">
+                <div class="example-card">Circumference = π × diameter</div>
+                <div class="example-card">C = π × d</div>
+                <div class="example-card">or C = 2 × π × r</div>
+            </div>
+
+            <h3>🥧 What is Pi (π)?</h3>
+            <p><strong>Pi</strong> is a special number that connects every circle in the universe: if you divide any circle's circumference by its diameter, you always get the same number — <strong>π ≈ 3.14</strong>.</p>
+            <div class="highlight-box">
+                <h3>The Magic of Pi</h3>
+                <p class="big-result">π ≈ 3.14159…</p>
+                <p>It never ends and never repeats! People have memorized thousands of its digits.</p>
+            </div>
+
+            <div class="quiz" data-quiz="pi">
+                <h3>Quick Quiz</h3>
+                <p>What do you get when you divide a circle's circumference by its diameter?</p>
+                <div class="options">
+                    <button data-answer="wrong">2</button>
+                    <button data-answer="correct">π (about 3.14)</button>
+                    <button data-answer="wrong">10</button>
+                    <button data-answer="wrong">It depends on the circle</button>
+                </div>
+                <p class="feedback"></p>
+            </div>
+
+            <div class="visual-box">
+                <h3>🔵 Circle Explorer</h3>
+                <p>Drag the slider to change the <strong>radius</strong>. Watch the diameter, circumference, and the circle itself update!</p>
+                <input type="range" min="1" max="10" value="3" class="slider" id="circle-radius-slider">
+                <p class="slider-value">Radius: <span id="circle-r">3</span></p>
+                <div class="circle-explorer">
+                    <svg viewBox="0 0 240 240" class="circle-svg" id="circle-svg">
+                        <!-- circle -->
+                        <circle id="explorer-circle" cx="120" cy="120" r="45" fill="rgba(37,99,235,0.15)" stroke="#2563eb" stroke-width="3"/>
+                        <!-- radius line -->
+                        <line id="explorer-radius" x1="120" y1="120" x2="165" y2="120" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/>
+                        <!-- diameter line -->
+                        <line id="explorer-diameter" x1="75" y1="120" x2="165" y2="120" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 4"/>
+                        <!-- center dot -->
+                        <circle cx="120" cy="120" r="4" fill="#1e293b"/>
+                    </svg>
+                </div>
+                <div class="circle-stats">
+                    <p>📏 Diameter = <strong><span id="circle-d">6</span></strong></p>
+                    <p>🥁 Circumference = <strong><span id="circle-c">18.85</span></strong> (≈ π × <span id="circle-d2">6</span>)</p>
+                </div>
+                <p id="circle-scenario" class="visual-feedback">A circle with radius 3 has a diameter of 6 and a circumference of about 18.85!</p>
+            </div>
+
+            <div class="game-box">
+                <h3>🎯 Mini Game: Name That Part!</h3>
+                <div class="stickman-hint">
+                    <div class="stickman" id="circle-stickman">
+                        <div class="s-head"></div>
+                        <div class="s-body"></div>
+                        <div class="s-arm s-left-arm"></div>
+                        <div class="s-arm s-right-arm"></div>
+                        <div class="s-leg s-left-leg"></div>
+                        <div class="s-leg s-right-leg"></div>
+                    </div>
+                    <p>Stickman the explorer is pointing at parts of a circle. Can you name them?</p>
+                </div>
+                <p>Look at the highlighted part and click the right name!</p>
+                <div class="circle-game-visual">
+                    <svg viewBox="0 0 240 240" class="circle-svg">
+                        <circle cx="120" cy="120" r="80" fill="rgba(37,99,235,0.1)" stroke="#2563eb" stroke-width="3"/>
+                        <!-- highlightable parts -->
+                        <line id="game-part-line" x1="120" y1="120" x2="200" y2="120" stroke="#ef4444" stroke-width="5" stroke-linecap="round"/>
+                        <circle id="game-part-circumference" cx="120" cy="120" r="80" fill="none" stroke="transparent" stroke-width="6"/>
+                        <circle cx="120" cy="120" r="4" fill="#1e293b"/>
+                        <text x="120" y="250" text-anchor="middle" font-size="14" font-weight="bold" fill="#ef4444" id="game-part-label">?</text>
+                    </svg>
+                </div>
+                <div class="options circle-game-options" id="circle-game-options">
+                    <button data-part="radius">Radius</button>
+                    <button data-part="diameter">Diameter</button>
+                    <button data-part="circumference">Circumference</button>
+                </div>
+                <p id="circle-game-message" class="game-feedback">Which part is highlighted?</p>
+                <p class="game-score">Score: <span id="circle-game-score">0</span></p>
+            </div>
+
+            <div class="exercise memory-test" id="pi-memory-test">
+                <h3>🧠 Memory Test: Remember Pi!</h3>
+                <p><strong>Study card:</strong> Pi is about 3.14. Circumference = π × diameter.</p>
+                <p class="memory-formula"><code>π ≈ 3.14</code></p>
+                <p id="pi-question">Question 1: What is π?</p>
+                <div class="memory-options" id="pi-options"></div>
+                <p id="pi-feedback" class="exercise-feedback" role="status"></p>
+                <p class="game-score">Memory score: <span id="pi-score">0</span> / 3</p>
+                <button class="game-button" id="pi-next" style="display:none;">Next Question</button>
+                <button class="game-button" id="pi-restart" style="display:none;">Practice Again</button>
+            </div>
+
+            <h3>🌊 The Fourier Technique</h3>
+            <p>The <strong>Fourier technique</strong> is one of the most amazing ideas in math: <strong>any wavy shape can be built by adding simple spinning circles!</strong></p>
+            <p>Named after the mathematician <strong>Joseph Fourier</strong>, it lets scientists break down music, voices, heartbeats, and even pictures into simple waves.</p>
+            <ul>
+                <li>One circle spinning = a simple smooth wave</li>
+                <li>Two or more circles spinning at different speeds = wiggly waves</li>
+                <li>Add enough circles = ANY wave you can imagine!</li>
+            </ul>
+            <div class="highlight-box">
+                <h3>Where is Fourier used?</h3>
+                <p>🎵 Music apps — to show sound waves</p>
+                <p>🖼️ Image compression — like JPEG photos</p>
+                <p>❤️ Heart monitors — to find heartbeats in signals</p>
+                <p>📱 Wi-Fi and phones — to send signals cleanly</p>
+            </div>
+
+            <div class="visual-box">
+                <h3>🌀 Fourier Wave Builder</h3>
+                <p>Add spinning circles and watch them draw a wave together. More circles = wigglier waves!</p>
+                <input type="range" min="1" max="4" value="1" class="slider" id="fourier-slider">
+                <p class="slider-value">Circles spinning: <span id="fourier-count">1</span></p>
+                <canvas id="fourier-canvas" width="600" height="220" class="physics-canvas"></canvas>
+                <p id="fourier-scenario" class="visual-feedback">One circle makes a smooth wave. Try adding more!</p>
+            </div>
+
+            <div class="quiz" data-quiz="fourier">
+                <h3>Quick Quiz</h3>
+                <p>What does the Fourier technique let us do?</p>
+                <div class="options">
+                    <button data-answer="wrong">Count the digits of pi</button>
+                    <button data-answer="wrong">Measure the radius of any circle</button>
+                    <button data-answer="correct">Build any wave by adding simple spinning circles</button>
+                    <button data-answer="wrong">Turn circles into squares</button>
+                </div>
+                <p class="feedback"></p>
+            </div>
+
+            <div class="exercise" id="pi-exercise">
+                <h3>Interactive Exercise: Circumference Practice</h3>
+                <p class="exercise-question"></p>
+                <input type="number" class="exercise-input" placeholder="Enter your answer">
+                <button class="exercise-submit">Check</button>
+                <button class="exercise-next" style="display:none;">Next Question</button>
+                <p class="exercise-feedback"></p>
+                <p class="exercise-streak">Streak: 0</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

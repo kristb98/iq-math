@@ -141,10 +141,34 @@ document.addEventListener('DOMContentLoaded', () => {
     initFactorialVisualizer();
     initEnergyVisualizer();
     initEmc2MemoryTest();
+    initPiMemoryTest();
     initPowerVisualizer();
     initTowerVisualizer();
     initSqrtVisualizer();
     initCbrtVisualizer();
+    initCircleExplorer();
+    initCirclePartGame();
+    initFourierVisualizer();
+
+    // Pi circumference practice
+    initInputExercise('pi-exercise', () => {
+        const isDiameter = Math.random() < 0.5;
+        const diameter = randInt(2, 10);
+        if (isDiameter) {
+            return {
+                question: `A circle has a diameter of ${diameter}. What is its circumference? (use π ≈ 3.14, round to the nearest whole number)`,
+                answer: Math.round(3.14 * diameter),
+                hint: `C = π × d = 3.14 × ${diameter} ≈ ${Math.round(3.14 * diameter)}`
+            };
+        } else {
+            const radius = diameter / 2;
+            return {
+                question: `A circle has a radius of ${radius}. What is its diameter?`,
+                answer: diameter,
+                hint: `d = 2 × r = 2 × ${radius} = ${diameter}`
+            };
+        }
+    });
 
     // 10. Mini Games
     initRocketGame();
@@ -572,6 +596,362 @@ function initEmc2MemoryTest() {
     });
 
     showQuestion();
+}
+
+function initPiMemoryTest() {
+    const test = document.getElementById('pi-memory-test');
+    if (!test) return;
+
+    const questionEl = document.getElementById('pi-question');
+    const optionsEl = document.getElementById('pi-options');
+    const feedbackEl = document.getElementById('pi-feedback');
+    const scoreEl = document.getElementById('pi-score');
+    const nextBtn = document.getElementById('pi-next');
+    const restartBtn = document.getElementById('pi-restart');
+
+    const questions = [
+        {
+            question: 'What is π (pi)?',
+            answers: ['A special number ≈ 3.14', 'A kind of pie', 'A type of circle'],
+            correct: 'A special number ≈ 3.14'
+        },
+        {
+            question: 'Circumference = ?',
+            answers: ['π × diameter', 'diameter ÷ 2', 'radius × radius'],
+            correct: 'π × diameter'
+        },
+        {
+            question: 'Diameter = ?',
+            answers: ['radius ÷ 2', '2 × radius', 'π × radius'],
+            correct: '2 × radius'
+        }
+    ];
+
+    let questionIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    function showQuestion() {
+        const current = questions[questionIndex];
+        answered = false;
+        questionEl.innerHTML = `Question ${questionIndex + 1} of 3: <strong>${current.question}</strong>`;
+        optionsEl.innerHTML = '';
+        feedbackEl.textContent = '';
+        feedbackEl.className = 'exercise-feedback';
+        nextBtn.style.display = 'none';
+        restartBtn.style.display = 'none';
+
+        current.answers.forEach(answer => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'memory-option';
+            button.textContent = answer;
+            button.addEventListener('click', () => {
+                if (answered) return;
+                answered = true;
+                optionsEl.querySelectorAll('button').forEach(option => option.disabled = true);
+
+                if (answer === current.correct) {
+                    score++;
+                    button.classList.add('correct');
+                    feedbackEl.textContent = '✅ Correct! Say it out loud: π ≈ 3.14!';
+                    feedbackEl.className = 'exercise-feedback correct';
+                    celebrateStickman('circle-stickman');
+                } else {
+                    button.classList.add('wrong');
+                    feedbackEl.textContent = `Not quite. Remember: ${current.correct}.`;
+                    feedbackEl.className = 'exercise-feedback wrong';
+                    optionsEl.querySelectorAll('button').forEach(optionBtn => {
+                        if (optionBtn.textContent === current.correct) optionBtn.classList.add('correct');
+                    });
+                }
+
+                scoreEl.textContent = score;
+                if (questionIndex < questions.length - 1) {
+                    nextBtn.style.display = 'inline-block';
+                } else {
+                    restartBtn.style.display = 'inline-block';
+                    feedbackEl.textContent += ` Final score: ${score} / 3.`;
+                }
+            });
+            optionsEl.appendChild(button);
+        });
+    }
+
+    nextBtn.addEventListener('click', () => {
+        questionIndex++;
+        showQuestion();
+    });
+
+    restartBtn.addEventListener('click', () => {
+        questionIndex = 0;
+        score = 0;
+        scoreEl.textContent = '0';
+        showQuestion();
+    });
+
+    showQuestion();
+}
+
+function initCircleExplorer() {
+    const slider = document.getElementById('circle-radius-slider');
+    if (!slider) return;
+
+    const circleEl = document.getElementById('explorer-circle');
+    const radiusLine = document.getElementById('explorer-radius');
+    const diameterLine = document.getElementById('explorer-diameter');
+    const rEl = document.getElementById('circle-r');
+    const dEl = document.getElementById('circle-d');
+    const dEl2 = document.getElementById('circle-d2');
+    const cEl = document.getElementById('circle-c');
+    const scenarioEl = document.getElementById('circle-scenario');
+
+    function update() {
+        const r = parseInt(slider.value);
+        // Scale: radius 1-10 maps to SVG radius 10-100
+        const svgR = 10 + r * 9;
+        const center = 120;
+
+        circleEl.setAttribute('r', svgR);
+        radiusLine.setAttribute('x2', center + svgR);
+        diameterLine.setAttribute('x1', center - svgR);
+        diameterLine.setAttribute('x2', center + svgR);
+
+        const diameter = r * 2;
+        const circumference = 3.14 * diameter;
+
+        rEl.textContent = r;
+        dEl.textContent = diameter;
+        dEl2.textContent = diameter;
+        cEl.textContent = circumference.toFixed(2);
+
+        scenarioEl.textContent = `A circle with radius ${r} has a diameter of ${diameter} and a circumference of about ${circumference.toFixed(1)}!`;
+    }
+
+    slider.addEventListener('input', update);
+    update();
+}
+
+function initCirclePartGame() {
+    const optionsEl = document.getElementById('circle-game-options');
+    if (!optionsEl) return;
+
+    const lineEl = document.getElementById('game-part-line');
+    const circEl = document.getElementById('game-part-circumference');
+    const labelEl = document.getElementById('game-part-label');
+    const messageEl = document.getElementById('circle-game-message');
+    const scoreEl = document.getElementById('circle-game-score');
+
+    const parts = [
+        {
+            name: 'radius',
+            setup: () => {
+                lineEl.setAttribute('x1', 120);
+                lineEl.setAttribute('y1', 120);
+                lineEl.setAttribute('x2', 200);
+                lineEl.setAttribute('y2', 120);
+                lineEl.style.display = '';
+                circEl.style.stroke = 'transparent';
+                labelEl.textContent = 'from center to edge';
+            }
+        },
+        {
+            name: 'diameter',
+            setup: () => {
+                lineEl.setAttribute('x1', 40);
+                lineEl.setAttribute('y1', 120);
+                lineEl.setAttribute('x2', 200);
+                lineEl.setAttribute('y2', 120);
+                lineEl.style.display = '';
+                circEl.style.stroke = 'transparent';
+                labelEl.textContent = 'all the way across, through the center';
+            }
+        },
+        {
+            name: 'circumference',
+            setup: () => {
+                lineEl.style.display = 'none';
+                circEl.style.stroke = '#ef4444';
+                labelEl.textContent = 'the distance all the way around';
+            }
+        }
+    ];
+
+    let current = null;
+    let score = 0;
+
+    function nextPart() {
+        current = parts[randInt(0, parts.length - 1)];
+        current.setup();
+        messageEl.textContent = 'Which part is highlighted?';
+        messageEl.className = 'game-feedback';
+        optionsEl.querySelectorAll('button').forEach(btn => {
+            btn.disabled = false;
+            btn.classList.remove('correct', 'wrong');
+        });
+    }
+
+    optionsEl.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.disabled) return;
+            optionsEl.querySelectorAll('button').forEach(b => b.disabled = true);
+
+            if (btn.dataset.part === current.name) {
+                score++;
+                scoreEl.textContent = score;
+                btn.classList.add('correct');
+                messageEl.textContent = `✅ Correct! That's the ${current.name}!`;
+                messageEl.className = 'game-feedback correct';
+                celebrateStickman('circle-stickman');
+            } else {
+                btn.classList.add('wrong');
+                const right = [...optionsEl.querySelectorAll('button')].find(b => b.dataset.part === current.name);
+                if (right) right.classList.add('correct');
+                messageEl.textContent = `❌ That was the ${current.name}. Try the next one!`;
+                messageEl.className = 'game-feedback wrong';
+            }
+
+            setTimeout(nextPart, 1600);
+        });
+    });
+
+    nextPart();
+}
+
+function initFourierVisualizer() {
+    const canvas = document.getElementById('fourier-canvas');
+    if (!canvas) return;
+
+    const slider = document.getElementById('fourier-slider');
+    const countEl = document.getElementById('fourier-count');
+    const scenarioEl = document.getElementById('fourier-scenario');
+    const ctx = canvas.getContext('2d');
+
+    let animId = null;
+    let running = false;
+    let time = 0;
+    const wavePoints = [];
+
+    function draw() {
+        time += 0.02;
+        const numCircles = parseInt(slider.value);
+        countEl.textContent = numCircles;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Background
+        ctx.fillStyle = '#e0f2fe';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(0.5, 0.5, canvas.width - 1, canvas.height - 1);
+
+        // Spinning circles on the left side
+        let x = 60;
+        let y = canvas.height / 2;
+
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < numCircles; i++) {
+            const radius = 40 / (i + 1);
+            const speed = 2 * (i + 1) * (i % 2 === 0 ? 1 : -1);
+
+            // Draw circle
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Compute next position on this circle
+            const angle = time * speed;
+            const nextX = x + radius * Math.cos(angle);
+            const nextY = y + radius * Math.sin(angle);
+
+            // Radius arm
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(nextX, nextY);
+            ctx.stroke();
+
+            x = nextX;
+            y = nextY;
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1;
+        }
+
+        // Tip of the last circle
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Add point to the wave
+        wavePoints.unshift({ y });
+        if (wavePoints.length > canvas.width - 140) wavePoints.pop();
+
+        // Draw the wave
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        wavePoints.forEach((point, index) => {
+            const waveX = 140 + index;
+            if (index === 0) {
+                ctx.moveTo(waveX, point.y);
+            } else {
+                ctx.lineTo(waveX, point.y);
+            }
+        });
+        ctx.stroke();
+
+        // Connector from tip to wave start
+        ctx.strokeStyle = '#94a3b8';
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(140, wavePoints[0] ? wavePoints[0].y : y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const scenarios = {
+            1: 'One circle makes a smooth wave.',
+            2: 'Two circles make the wave bumpier!',
+            3: 'Three circles — getting wiggly!',
+            4: 'Four circles — a super wiggly wave! This is the Fourier technique!'
+        };
+        scenarioEl.textContent = scenarios[numCircles];
+
+        animId = requestAnimationFrame(draw);
+    }
+
+    if (slider) {
+        slider.addEventListener('input', () => {
+            wavePoints.length = 0;
+        });
+    }
+
+    function start() {
+        if (running) return;
+        running = true;
+        draw();
+    }
+
+    function stop() {
+        running = false;
+        cancelAnimationFrame(animId);
+    }
+
+    start();
+
+    // Stop the animation when the page is hidden to save battery
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stop();
+        } else {
+            start();
+        }
+    });
 }
 
 function initPowerVisualizer() {
