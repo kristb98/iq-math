@@ -2168,7 +2168,7 @@ function initMixedTest() {
     }
 
     function startTest() {
-        questions = buildTestQuestions();
+        questions = buildTieredTestQuestions(getTestTier());
         index = 0;
         score = 0;
         resultEl.style.display = 'none';
@@ -2178,6 +2178,15 @@ function initMixedTest() {
     }
 
     function finishAnswer(wasCorrect) {
+        // Extras hook: lets the optional mistake journal record wrong answers.
+        if (typeof window.onIQAnswer === 'function') {
+            try {
+                window.onIQAnswer(questions[index], wasCorrect, index, questions.length);
+            } catch (error) {
+                // The test itself must never be blocked by extras.
+            }
+        }
+
         if (wasCorrect) {
             score++;
             feedbackEl.textContent = '✅ Correct';
@@ -2208,6 +2217,14 @@ function initMixedTest() {
                 renderTestHistory(historyListEl, saveTestResult(score, questions.length, percent));
             } catch (error) {
                 // If storage or history rendering fails, the result stays visible.
+            }
+
+            if (typeof window.onIQTestFinish === 'function') {
+                try {
+                    window.onIQTestFinish(score, questions.length, percent);
+                } catch (error) {
+                    // Extras are best-effort; the result screen stays visible.
+                }
             }
         } else {
             // Auto-save: on return, resume at the next (unanswered) question.

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IQ Math</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
     <nav class="navbar">
@@ -67,6 +70,19 @@
                     <p id="part-message" class="game-feedback">Click a button to see that part glow!</p>
                     <p class="game-score">Parts explored: <span id="part-score">0</span> / 4</p>
                 </div>
+                <div class="visual-box playground" id="tesseract-playground">
+                    <h3>🌀 4D Rotator</h3>
+                    <p>Drag the sliders to rotate a tesseract through four dimensions. Purple edges are the ones facing you.</p>
+                    <canvas id="tesseract-canvas" width="420" height="360" aria-label="Rotating tesseract"></canvas>
+                    <div class="playground-controls">
+                        <label>X–Y: <input type="range" min="0" max="360" value="20" class="slider rot-xy"></label>
+                        <label>X–Z: <input type="range" min="0" max="360" value="15" class="slider rot-xz"></label>
+                        <label>X–W: <input type="range" min="0" max="360" value="25" class="slider rot-xw"></label>
+                        <label>Y–W: <input type="range" min="0" max="360" value="0" class="slider rot-yw"></label>
+                        <label>Z–W: <input type="range" min="0" max="360" value="0" class="slider rot-zw"></label>
+                    </div>
+                    <button type="button" class="tesseract-spin">▶ Auto-spin</button>
+                </div>
         </div>
     </main>
 
@@ -75,5 +91,6 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="features.js"></script>
 </body>
 </html>

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IQ Math</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
     <nav class="navbar">
@@ -45,6 +48,17 @@
                     <p id="tower-scenario" class="visual-feedback">A tower of height 2 is easy. Height 3 gets huge fast!</p>
                 </div>
 
+                <div class="visual-box playground" id="tetration-playground">
+                    <h3>🌌 Growth Playground</h3>
+                    <p>Slide the base and height to watch a tower escape ordinary numbers.</p>
+                    <div class="playground-controls">
+                        <label>Base: <input type="range" min="2" max="9" value="2" class="slider tg-base"></label>
+                        <label>Height: <input type="range" min="1" max="5" value="3" class="slider tg-height"></label>
+                    </div>
+                    <div class="tower-steps tg-steps"></div>
+                    <p class="playground-result tg-result"></p>
+                </div>
+
                 <div class="quiz" data-quiz="tetration">
                     <h3>Quick Quiz</h3>
                     <p>What is <sup>3</sup>2 (2 tetrated to height 3)?</p>
@@ -74,5 +88,6 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="features.js"></script>
 </body>
 </html>

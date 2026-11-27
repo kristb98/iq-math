@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IQ Math - Test</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
     <nav class="navbar">
@@ -19,6 +22,14 @@
         <div class="container">
             <h2>Mixed Test</h2>
             <p class="test-intro">16 questions covering every topic. A brand-new random set is generated on every attempt, and no explanations are shown.</p>
+
+            <div class="tier-selector" id="tier-selector">
+                <span class="tier-label">Difficulty:</span>
+                <button type="button" data-tier="explorer">Explorer</button>
+                <button type="button" data-tier="challenge">Challenge</button>
+                <button type="button" data-tier="master">Master</button>
+                <span class="tier-current"></span>
+            </div>
 
             <div class="test" id="mixed-test">
                 <div class="test-active">
@@ -40,6 +51,7 @@
                     <p class="test-percentage"></p>
                     <div class="test-result-actions">
                         <button class="test-restart">New Random Test</button>
+                        <button class="test-review" style="display:none;">📓 Save missed questions</button>
                         <a href="index.html" class="test-home">Home</a>
                     </div>
                     <div class="test-history">
@@ -82,6 +94,17 @@
                 </div>
                 <p class="calc-result"></p>
             </div>
+            <div class="mistake-journal" id="mistake-journal">
+                <h3>📓 Mistake Journal</h3>
+                <p class="mistake-note">Optional: save the questions you missed to review them later. The test itself never reveals answers.</p>
+                <p class="mistake-empty">No saved questions yet.</p>
+                <ul class="mistake-list"></ul>
+            </div>
+
+            <div class="feature-links">
+                <a href="boss.html" class="feature-link">👑 Boss Battle</a>
+                <a href="achievements.html" class="feature-link">🏅 Achievement Cabinet</a>
+            </div>
         </div>
     </main>
 
@@ -90,5 +113,6 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="features.js"></script>
 </body>
 </html>

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IQ Math</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
     <nav class="navbar">
@@ -19,9 +22,43 @@
         <h1>Welcome to <span class="brand">IQ Math</span></h1>
         <p>Learn math the fun way with clear examples, interactive visuals, and mini games!</p>
         <a href="#categories" class="cta-button">Explore Topics</a>
+        <button type="button" class="install-button" hidden>⬇️ Install app</button>
     </header>
 
     <main>
+        <section id="number-day" class="section alt">
+            <div class="container">
+                <h2>Number of the Day</h2>
+                <div class="number-card" id="number-day-card">
+                    <span class="number-value"></span>
+                    <div>
+                        <h3 class="number-title"></h3>
+                        <p class="number-fact"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="daily" class="section">
+            <div class="container">
+                <h2>Daily Challenge</h2>
+                <p>One fresh question every day. Get it right to keep your streak alive.</p>
+                <div class="daily-card" id="daily-challenge-card">
+                    <div class="daily-header">
+                        <span class="daily-date"></span>
+                        <span class="daily-streak"></span>
+                    </div>
+                    <p class="daily-question"></p>
+                    <div class="daily-answer-row">
+                        <input type="text" class="daily-input" placeholder="Your answer" autocomplete="off">
+                        <button type="button" class="daily-submit">Check Answer</button>
+                    </div>
+                    <p class="daily-feedback"></p>
+                    <div class="daily-week"></div>
+                </div>
+            </div>
+        </section>
+
         <section id="categories" class="section">
             <div class="container">
                 <h2>Choose a Category</h2>
@@ -107,6 +144,29 @@
                 </div>
             </div>
         </section>
+
+        <section id="more" class="section">
+            <div class="container">
+                <h2>More Ways to Play</h2>
+                <div class="feature-links">
+                    <a href="test.html" class="feature-link">🧪 Mixed Test <small>Explorer, Challenge and Master levels</small></a>
+                    <a href="boss.html" class="feature-link">👑 Boss Battle <small>Twelve master questions against the clock</small></a>
+                    <a href="test.html#mistake-journal" class="feature-link">📓 Mistake Journal <small>Review the ones you missed</small></a>
+                    <a href="achievements.html" class="feature-link">🏅 Achievement Cabinet <small>Collect every badge</small></a>
+                    <a href="tetration.html#tetration-playground" class="feature-link">🏗️ Growth Playground <small>Watch a power tower explode</small></a>
+                    <a href="tesseract.html#tesseract-playground" class="feature-link">🌀 4D Rotator <small>Spin a tesseract in four dimensions</small></a>
+                </div>
+            </div>
+        </section>
+
+        <section id="achievements" class="section alt">
+            <div class="container">
+                <h2>Achievements</h2>
+                <p><span class="achievement-count">0 / 9 unlocked</span> — badges unlock as you play.</p>
+                <div class="achievement-grid"></div>
+                <p class="achievement-more"><a href="achievements.html">Open the full cabinet →</a></p>
+            </div>
+        </section>
     </main>
 
     <footer class="footer">
@@ -114,5 +174,6 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="features.js"></script>
 </body>
 </html>

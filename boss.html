@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math - Boss Battle</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <h2>👑 Boss Battle</h2>
+            <p class="test-intro">Twelve master-level questions, one from every topic. Beat the clock, no explanations along the way.</p>
+
+            <div class="boss" id="boss-battle">
+                <div class="boss-status">
+                    <span class="boss-progress">Battle question 1 / 12</span>
+                    <span class="boss-score">Hits: 0</span>
+                    <span class="boss-timer">00:00</span>
+                </div>
+
+                <div class="boss-active">
+                    <p class="boss-question"></p>
+                    <input type="text" class="boss-input" placeholder="Your answer" autocomplete="off">
+                    <button class="boss-submit">Attack</button>
+                    <div class="boss-choices" style="display:none;"></div>
+                    <button class="boss-next" style="display:none;">Next Question</button>
+                    <p class="boss-feedback"></p>
+                </div>
+
+                <div class="boss-result" style="display:none;">
+                    <h3>Battle Complete</h3>
+                    <p class="boss-final"></p>
+                    <p class="boss-percent"></p>
+                    <p class="boss-time"></p>
+                    <p class="boss-best"></p>
+                    <div class="test-result-actions">
+                        <button class="boss-restart">Boss Rematch</button>
+                        <a href="test.html" class="test-home">Mixed Test</a>
+                        <a href="index.html" class="test-home">Home</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-links">
+                <a href="test.html" class="feature-link">🧪 Mixed Test with difficulty tiers</a>
+                <a href="achievements.html" class="feature-link">🏅 Achievement Cabinet</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="features.js"></script>
+</body>
+</html>
