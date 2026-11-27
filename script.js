@@ -218,6 +218,53 @@ function randChoice(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/* =========================================================================
+   PROGRESS AUTO-SAVE (works like Gmail drafts — leave and come back
+   without losing your place). Everything is stored in localStorage under
+   one key, best-effort so private browsing never breaks the site.
+   ========================================================================= */
+
+const PROGRESS_KEY = 'iqMathProgress';
+
+function readProgress(scope, fallback) {
+    try {
+        const raw = localStorage.getItem(PROGRESS_KEY);
+        const all = raw ? JSON.parse(raw) : {};
+        const value = all ? all[scope] : undefined;
+        return (value === undefined || value === null) ? fallback : value;
+    } catch (error) {
+        return fallback;
+    }
+}
+
+function writeProgress(scope, value) {
+    try {
+        let all = {};
+        try {
+            const raw = localStorage.getItem(PROGRESS_KEY);
+            all = raw ? JSON.parse(raw) : {};
+        } catch (error) {
+            all = {};
+        }
+        all[scope] = value;
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify(all));
+    } catch (error) {
+        // Storage can be unavailable in some private browsing modes; saving is best-effort.
+    }
+}
+
+function clearProgress(scope) {
+    try {
+        const raw = localStorage.getItem(PROGRESS_KEY);
+        if (!raw) return;
+        const all = JSON.parse(raw);
+        delete all[scope];
+        localStorage.setItem(PROGRESS_KEY, JSON.stringify(all));
+    } catch (error) {
+        // Nothing to do.
+    }
+}
+
 function initInputExercise(containerId, generator) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -230,7 +277,8 @@ function initInputExercise(containerId, generator) {
     const streakEl = container.querySelector('.exercise-streak');
 
     let current = null;
-    let streak = 0;
+    let streak = readProgress('streak:' + containerId, 0) || 0;
+    if (streakEl && streak > 0) streakEl.textContent = `Streak: ${streak}`;
 
     function nextQuestion() {
         current = generator();
@@ -267,6 +315,7 @@ function initInputExercise(containerId, generator) {
         }
 
         if (streakEl) streakEl.textContent = `Streak: ${streak}`;
+        writeProgress('streak:' + containerId, streak);
     }
 
     submitBtn.addEventListener('click', checkAnswer);
@@ -515,6 +564,14 @@ function initEmc2MemoryTest() {
     let score = 0;
     let answered = false;
 
+    // Auto-save: resume at the first unanswered question after leaving.
+    const savedEmc2 = readProgress('emc2Memory', null);
+    if (savedEmc2 && typeof savedEmc2.q === 'number' && savedEmc2.q > 0 && savedEmc2.q < questions.length) {
+        questionIndex = savedEmc2.q;
+        score = typeof savedEmc2.score === 'number' ? savedEmc2.score : 0;
+        scoreEl.textContent = score;
+    }
+
     function showQuestion() {
         const current = questions[questionIndex];
         answered = false;
@@ -556,8 +613,10 @@ function initEmc2MemoryTest() {
 
         scoreEl.textContent = score;
         if (questionIndex < questions.length - 1) {
+            writeProgress('emc2Memory', { q: questionIndex + 1, score: score });
             nextBtn.style.display = 'inline-block';
         } else {
+            clearProgress('emc2Memory');
             restartBtn.style.display = 'inline-block';
             feedbackEl.textContent += ` Final score: ${score} / 3.`;
         }
@@ -611,6 +670,14 @@ function initPiMemoryTest() {
     let score = 0;
     let answered = false;
 
+    // Auto-save: resume at the first unanswered question after leaving.
+    const savedPi = readProgress('piMemory', null);
+    if (savedPi && typeof savedPi.q === 'number' && savedPi.q > 0 && savedPi.q < questions.length) {
+        questionIndex = savedPi.q;
+        score = typeof savedPi.score === 'number' ? savedPi.score : 0;
+        scoreEl.textContent = score;
+    }
+
     function showQuestion() {
         const current = questions[questionIndex];
         answered = false;
@@ -648,8 +715,10 @@ function initPiMemoryTest() {
 
                 scoreEl.textContent = score;
                 if (questionIndex < questions.length - 1) {
+                    writeProgress('piMemory', { q: questionIndex + 1, score: score });
                     nextBtn.style.display = 'inline-block';
                 } else {
+                    clearProgress('piMemory');
                     restartBtn.style.display = 'inline-block';
                     feedbackEl.textContent += ` Final score: ${score} / 3.`;
                 }
@@ -1749,8 +1818,11 @@ function initSpeedChallenge() {
     const scoreEl = container.querySelector('.challenge-score');
 
     let current = null;
-    let score = 0;
-    let total = 0;
+    // Auto-save: keep the running score across visits.
+    const savedSpeed = readProgress('speedChallenge', null);
+    let score = savedSpeed && typeof savedSpeed.score === 'number' ? savedSpeed.score : 0;
+    let total = savedSpeed && typeof savedSpeed.total === 'number' ? savedSpeed.total : 0;
+    if (score > 0 || total > 0) scoreEl.textContent = `Score: ${score} / ${total}`;
 
     const generators = [
         () => {
@@ -1834,6 +1906,7 @@ function initSpeedChallenge() {
         }
 
         scoreEl.textContent = `Score: ${score} / ${total}`;
+        writeProgress('speedChallenge', { score: score, total: total });
     }
 
     submitBtn.addEventListener('click', check);
@@ -2024,6 +2097,29 @@ function initMixedTest() {
     let index = 0;
     let score = 0;
 
+    const TEST_SAVE_SCOPE = 'mixedTestActive';
+
+    function saveTestProgress(nextIndex) {
+        // Auto-save the whole in-progress test (like a Gmail draft).
+        writeProgress(TEST_SAVE_SCOPE, {
+            v: 1,
+            questions: questions,
+            index: typeof nextIndex === 'number' ? nextIndex : index,
+            score: score
+        });
+    }
+
+    function restoreTestProgress() {
+        const saved = readProgress(TEST_SAVE_SCOPE, null);
+        if (!saved || saved.v !== 1) return false;
+        if (!Array.isArray(saved.questions) || !saved.questions.length) return false;
+        if (typeof saved.index !== 'number' || saved.index < 0 || saved.index >= saved.questions.length) return false;
+        questions = saved.questions;
+        index = saved.index;
+        score = typeof saved.score === 'number' ? saved.score : 0;
+        return true;
+    }
+
     function showQuestion() {
         const current = questions[index];
         questionEl.innerHTML = current.question;
@@ -2066,6 +2162,7 @@ function initMixedTest() {
         score = 0;
         resultEl.style.display = 'none';
         activeArea.style.display = 'block';
+        saveTestProgress();
         showQuestion();
     }
 
@@ -2089,6 +2186,9 @@ function initMixedTest() {
             finalScoreEl.textContent = `${score} out of ${questions.length} correct`;
             percentageEl.textContent = `${percent}%`;
 
+            // The test is complete: clear the draft (the result is kept in history).
+            clearProgress(TEST_SAVE_SCOPE);
+
             // Reveal the result first; history is a bonus and must never block it.
             activeArea.style.display = 'none';
             resultEl.style.display = 'block';
@@ -2099,6 +2199,8 @@ function initMixedTest() {
                 // If storage or history rendering fails, the result stays visible.
             }
         } else {
+            // Auto-save: on return, resume at the next (unanswered) question.
+            saveTestProgress(index + 1);
             nextBtn.style.display = 'inline-block';
             submitBtn.textContent = 'Answered';
         }
@@ -2131,12 +2233,20 @@ function initMixedTest() {
     });
     nextBtn.addEventListener('click', () => {
         index++;
+        saveTestProgress();
         showQuestion();
     });
     restartBtn.addEventListener('click', startTest);
 
     renderTestHistory(historyListEl, readTestHistory());
-    startTest();
+    // Resume an unfinished test if there is one saved; otherwise start fresh.
+    if (restoreTestProgress()) {
+        resultEl.style.display = 'none';
+        activeArea.style.display = 'block';
+        showQuestion();
+    } else {
+        startTest();
+    }
 }
 
 // ---------------- BIG CALCULATION BOX ----------------

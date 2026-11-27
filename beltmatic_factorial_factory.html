@@ -652,6 +652,8 @@
 
         function loadLevel(idx) {
             state.levelIdx = Math.max(0, Math.min(LEVELS.length - 1, idx));
+            // Auto-save level progress (like Gmail drafts) so you never restart from level 1.
+            try { localStorage.setItem('beltmaticLevelProgress', String(state.levelIdx)); } catch (e) { /* private mode */ }
             const lvl = LEVELS[state.levelIdx];
 
             state.deliveredCount = 0;
@@ -1918,9 +1920,19 @@
             requestAnimationFrame(mainLoop);
         }
 
+        // Restore the last played level on load; fall back to level 1 for first-time players.
+        function readSavedLevel() {
+            try {
+                const idx = parseInt(localStorage.getItem('beltmaticLevelProgress'), 10);
+                return isNaN(idx) ? 0 : Math.max(0, Math.min(LEVELS.length - 1, idx));
+            } catch (e) {
+                return 0;
+            }
+        }
+
         window.onload = function () {
             resizeCanvas();
-            loadLevel(0);
+            loadLevel(readSavedLevel());
             requestAnimationFrame(mainLoop);
         };
     </script>
