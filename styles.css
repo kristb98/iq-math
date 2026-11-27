@@ -994,6 +994,26 @@ code {
     transform: scale(0.98);
 }
 
+.game-link-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 50px;
+    color: var(--white);
+    font-weight: 800;
+    font-size: 1.15rem;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-top: 0.5rem;
+}
+
+.game-link-button:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
+    text-decoration: none;
+}
+
 .game-feedback {
     font-weight: 700;
     font-size: 1.1rem;
