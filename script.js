@@ -150,26 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initCirclePartGame();
     initFourierVisualizer();
 
-    // Pi circumference practice
-    initInputExercise('pi-exercise', () => {
-        const isDiameter = Math.random() < 0.5;
-        const diameter = randInt(2, 10);
-        if (isDiameter) {
-            return {
-                question: `A circle has a diameter of ${diameter}. What is its circumference? (use π ≈ 3.14, round to the nearest whole number)`,
-                answer: Math.round(3.14 * diameter),
-                hint: `C = π × d = 3.14 × ${diameter} ≈ ${Math.round(3.14 * diameter)}`
-            };
-        } else {
-            const radius = diameter / 2;
-            return {
-                question: `A circle has a radius of ${radius}. What is its diameter?`,
-                answer: diameter,
-                hint: `d = 2 × r = 2 × ${radius} = ${diameter}`
-            };
-        }
-    });
-
     // 10. Mini Games
     initRocketGame();
     initAnimalGame();
