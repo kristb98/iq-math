@@ -25,6 +25,7 @@
         <p>Learn math the fun way with clear examples, interactive visuals, and mini games!</p>
         <a href="#categories" class="cta-button">Explore Topics</a>
         <button type="button" class="install-button" hidden>⬇️ Install app</button>
+        <button type="button" class="audio-toggle">🔇 Audio: Off</button>
     </header>
 
     <main>
@@ -49,6 +50,7 @@
                     <div class="daily-header">
                         <span class="daily-date"></span>
                         <span class="daily-streak"></span>
+                        <span class="daily-shields"></span>
                     </div>
                     <p class="daily-question"></p>
                     <div class="daily-answer-row">
@@ -58,6 +60,14 @@
                     <p class="daily-feedback"></p>
                     <div class="daily-week"></div>
                 </div>
+            </div>
+        </section>
+
+        <section id="mastery" class="section alt">
+            <div class="container">
+                <h2>Mastery Skill Tree</h2>
+                <p>Get three right in a row to master a topic. <span class="skill-mastered"></span></p>
+                <div id="skill-tree" class="skill-tree"></div>
             </div>
         </section>
 
@@ -157,14 +167,23 @@
                     <a href="achievements.html" class="feature-link">🏅 Achievement Cabinet <small>Collect every badge</small></a>
                     <a href="tetration.html#tetration-playground" class="feature-link">🏗️ Growth Playground <small>Watch a power tower explode</small></a>
                     <a href="tesseract.html#tesseract-playground" class="feature-link">🌀 4D Rotator <small>Spin a tesseract in four dimensions</small></a>
+                    <a href="#mastery" class="feature-link">🧠 Mastery Skill Tree <small>Unlock topics as you improve</small></a>
+                    <a href="flashcards.html" class="feature-link">🃏 Flashcard Lab <small>Spaced repetition from your weak spots</small></a>
+                    <a href="speedrun.html" class="feature-link">⏱️ Speed Run Arena <small>Ten questions in sixty seconds</small></a>
+                    <a href="detective.html" class="feature-link">🕵️ Math Detective <small>Follow the clues, crack the case</small></a>
+                    <a href="quests.html" class="feature-link">🗺️ Story Quests <small>Three stages and a mini-boss</small></a>
+                    <a href="bases.html" class="feature-link">🔢 Base Explorer <small>Binary, octal and hexadecimal</small></a>
+                    <a href="cosmetics.html" class="feature-link">🎨 Cosmetics Shop <small>Spend points on themes and frames</small></a>
+                    <a href="report.html" class="feature-link">📄 Progress Report <small>Printable summary of your journey</small></a>
                 </div>
+                <p class="egg-info">Hidden digit hunt: <span class="egg-count">0 / 10 digits found</span> — look for ✦ across the topic pages.</p>
             </div>
         </section>
 
         <section id="achievements" class="section alt">
             <div class="container">
                 <h2>Achievements</h2>
-                <p><span class="achievement-count">0 / 9 unlocked</span> — badges unlock as you play.</p>
+                <p><span class="achievement-count">0 / 15 unlocked</span> — badges unlock as you play.</p>
                 <div class="achievement-grid"></div>
                 <p class="achievement-more"><a href="achievements.html">Open the full cabinet →</a></p>
             </div>
@@ -177,5 +196,6 @@
 
     <script src="script.js"></script>
     <script src="features.js"></script>
+    <script src="extras.js"></script>
 </body>
 </html>

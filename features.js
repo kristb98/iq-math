@@ -324,7 +324,8 @@ function readDaily() {
         streak: saved.streak || 0,
         bestStreak: saved.bestStreak || 0,
         completed: saved.completed || {},
-        attempts: saved.attempts || {}
+        attempts: saved.attempts || {},
+        totalWins: saved.totalWins || 0
     };
 }
 
@@ -347,6 +348,7 @@ function initDailyChallenge() {
     const submitBtn = card.querySelector('.daily-submit');
     const feedbackEl = card.querySelector('.daily-feedback');
     const weekEl = card.querySelector('.daily-week');
+    const shieldsEl = card.querySelector('.daily-shields');
 
     if (dateEl) {
         dateEl.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
@@ -355,6 +357,10 @@ function initDailyChallenge() {
 
     function renderStreak() {
         if (streakEl) streakEl.textContent = `🔥 ${daily.streak} day streak`;
+        if (shieldsEl) {
+            const count = readProgress('streakShields', {}).count || 0;
+            shieldsEl.textContent = `🛡️ ${count} shield${count === 1 ? '' : 's'}`;
+        }
     }
 
     function renderWeek() {
@@ -395,9 +401,30 @@ function initDailyChallenge() {
         daily.attempts[key] = (daily.attempts[key] || 0) + 1;
         const tolerance = question.tolerance || 0;
         if (Math.abs(value - question.answer) <= tolerance) {
+            let shieldNote = '';
             if (daily.lastDate !== key) {
-                daily.streak = daily.lastDate === shiftDayKey(key, -1) ? (daily.streak || 0) + 1 : 1;
+                if (daily.lastDate === shiftDayKey(key, -1)) {
+                    daily.streak = (daily.streak || 0) + 1;
+                } else {
+                    const shields = readProgress('streakShields', {});
+                    if ((daily.streak || 0) > 0 && (shields.count || 0) > 0) {
+                        shields.count = shields.count - 1;
+                        shields.used = (shields.used || 0) + 1;
+                        writeProgress('streakShields', shields);
+                        shieldNote = ' 🛡️ Shield used — streak saved!';
+                    } else {
+                        daily.streak = 1;
+                    }
+                }
                 daily.lastDate = key;
+            }
+            daily.totalWins = (daily.totalWins || 0) + 1;
+            if (daily.totalWins % 3 === 0) {
+                const shields = readProgress('streakShields', {});
+                shields.count = (shields.count || 0) + 1;
+                shields.earned = (shields.earned || 0) + 1;
+                writeProgress('streakShields', shields);
+                shieldNote += ' 🛡️ Shield earned!';
             }
             daily.completed[key] = true;
             daily.bestStreak = Math.max(daily.bestStreak || 0, daily.streak);
@@ -405,7 +432,7 @@ function initDailyChallenge() {
             updateStats({ bestDailyStreak: daily.bestStreak });
             renderStreak();
             renderWeek();
-            lockForToday('✅ Correct! Streak saved.');
+            lockForToday('✅ Correct! Streak saved.' + shieldNote);
         } else {
             writeDaily(daily);
             feedbackEl.textContent = '❌ Not quite — try again.';

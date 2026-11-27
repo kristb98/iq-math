@@ -1,11 +1,19 @@
 /* IQ Math offline cache */
-const CACHE_NAME = 'iq-math-v4';
+const CACHE_NAME = 'iq-math-v5';
 const CORE_FILES = [
     './',
     './index.html',
     './test.html',
     './boss.html',
     './achievements.html',
+    './flashcards.html',
+    './speedrun.html',
+    './detective.html',
+    './quests.html',
+    './bases.html',
+    './cosmetics.html',
+    './report.html',
+    './beltmatic_factorial_factory.html',
     './cbrt.html',
     './emc2.html',
     './factorial.html',
@@ -22,6 +30,7 @@ const CORE_FILES = [
     './styles.css',
     './script.js',
     './features.js',
+    './extras.js',
     './manifest.json',
     './icon-192.png',
     './icon-512.png'

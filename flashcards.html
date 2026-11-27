@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math - Flashcard Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <h2>🃏 Flashcard Lab</h2>
+            <p class="test-intro">Short spaced-repetition cards built from every topic plus questions you missed. Answer honestly to move a card up a box.</p>
+
+            <div class="flashcard-lab" id="flashcard-lab">
+                <div class="flash-topline">
+                    <span class="flash-topic"></span>
+                    <span class="flash-status"></span>
+                </div>
+                <div class="flash-card">
+                    <span class="flash-card-label">Question</span>
+                    <p class="flash-front"></p>
+                    <p class="flash-back"></p>
+                </div>
+                <div class="flash-actions">
+                    <button type="button" class="flash-reveal">Show answer</button>
+                    <button type="button" class="flash-got">✓ Got it</button>
+                    <button type="button" class="flash-missed">✗ Missed it</button>
+                    <button type="button" class="flash-reset">Review all now</button>
+                </div>
+            </div>
+
+            <div class="feature-links">
+                <a href="test.html#mistake-journal" class="feature-link">📓 Mistake Journal</a>
+                <a href="index.html#mastery" class="feature-link">🧠 Mastery Map</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="features.js"></script>
+    <script src="extras.js"></script>
+</body>
+</html>

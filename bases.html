@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math - Base Explorer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <h2>🔢 Base Explorer</h2>
+            <p class="test-intro">Type a number or flip the bit tiles to see the same value in binary, octal and hexadecimal.</p>
+
+            <div class="base-explorer" id="base-explorer">
+                <label class="base-entry">Decimal value:
+                    <input type="number" min="0" max="255" value="42" class="base-input">
+                </label>
+
+                <div class="base-bits" aria-label="Eight toggleable bits"></div>
+                <p class="base-hint">Leftmost tile is 2⁷ = 128. Rightmost is 2⁰ = 1.</p>
+
+                <div class="base-results">
+                    <div class="base-result"><span>Decimal</span><strong class="base-decimal"></strong></div>
+                    <div class="base-result"><span>Binary (base 2)</span><strong class="base-binary"></strong></div>
+                    <div class="base-result"><span>Octal (base 8)</span><strong class="base-octal"></strong></div>
+                    <div class="base-result"><span>Hexadecimal (base 16)</span><strong class="base-hex"></strong></div>
+                </div>
+            </div>
+
+            <div class="feature-links">
+                <a href="powers.html" class="feature-link">⚡ Powers topic</a>
+                <a href="tetration.html" class="feature-link">🏗️ Growth Playground</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="features.js"></script>
+    <script src="extras.js"></script>
+</body>
+</html>

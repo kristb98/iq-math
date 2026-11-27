@@ -2134,6 +2134,13 @@ function initMixedTest() {
     function showQuestion() {
         const current = questions[index];
         questionEl.innerHTML = current.question;
+        if (typeof window.onIQQuestion === 'function') {
+            try {
+                window.onIQQuestion(current, index, questions.length);
+            } catch (error) {
+                // Audio extras are best-effort and never block the test.
+            }
+        }
         progressEl.textContent = `Question ${index + 1} / ${questions.length}`;
         scoreEl.textContent = `Correct: ${score}`;
         feedbackEl.textContent = '';

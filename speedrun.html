@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math - Speed Run Arena</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <h2>⏱️ Speed Run Arena</h2>
+            <p class="test-intro">Ten quick questions, sixty seconds, no explanations. Pick a topic and race your personal best.</p>
+
+            <div class="speed-run" id="speed-run">
+                <div class="speed-setup">
+                    <label>Topic:
+                        <select class="speed-topic">
+                            <option>All Topics</option>
+                            <option>Factorials</option>
+                            <option>Square Roots</option>
+                            <option>Cube Roots</option>
+                            <option>Powers</option>
+                            <option>Tetration</option>
+                            <option>Pentation</option>
+                            <option>Hexation</option>
+                            <option>Logarithms</option>
+                            <option>E=mc²</option>
+                            <option>Tesseract</option>
+                            <option>Finding Numbers</option>
+                            <option>Pi &amp; Circles</option>
+                        </select>
+                    </label>
+                    <button type="button" class="speed-start">Start Run</button>
+                    <span class="speed-best"></span>
+                </div>
+
+                <div class="speed-status-row">
+                    <span class="speed-status"></span>
+                    <span class="speed-clock">01:00</span>
+                </div>
+
+                <p class="speed-question">Choose a topic and start a run.</p>
+                <div class="speed-choices" style="display:none;"></div>
+                <input type="text" class="speed-input" placeholder="Your answer" autocomplete="off">
+                <button type="button" class="speed-submit">Submit</button>
+                <p class="speed-feedback"></p>
+
+                <div class="speed-result" style="display:none;">
+                    <h3>Run complete</h3>
+                    <p class="speed-final"></p>
+                    <button type="button" class="speed-start">Run again</button>
+                </div>
+            </div>
+
+            <div class="feature-links">
+                <a href="boss.html" class="feature-link">👑 Boss Battle</a>
+                <a href="report.html" class="feature-link">📄 Progress Report</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="features.js"></script>
+    <script src="extras.js"></script>
+</body>
+</html>

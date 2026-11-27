@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IQ Math - Math Detective</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand"><a href="index.html">IQ Math</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="test.html">Test</a></li>
+        </ul>
+    </nav>
+
+    <main class="topic-page">
+        <div class="container">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <h2>🕵️ Math Detective</h2>
+            <p class="test-intro">Follow the clues. Each correct answer unlocks the next line of the case.</p>
+
+            <div class="detective" id="detective">
+                <div class="detective-topline">
+                    <span class="detective-count"></span>
+                    <span class="detective-progress"></span>
+                </div>
+                <div class="detective-cases"></div>
+                <div class="detective-panel">
+                    <p class="detective-story"></p>
+                    <p class="detective-question"></p>
+                    <input type="text" class="detective-input" placeholder="Your answer" autocomplete="off">
+                    <button type="button" class="detective-submit">Follow clue</button>
+                    <p class="detective-feedback"></p>
+                </div>
+            </div>
+
+            <div class="feature-links">
+                <a href="quests.html" class="feature-link">🗺️ Story Quests</a>
+                <a href="achievements.html" class="feature-link">🏅 Achievement Cabinet</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 IQ Math. Learn math the smart way.</p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="features.js"></script>
+    <script src="extras.js"></script>
+</body>
+</html>
