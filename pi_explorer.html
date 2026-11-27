@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pi Explorer — Circle Challenge</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg,
+      #b388ff 0%,
+      #82b1ff 20%,
+      #64f0e0 40%,
+      #8affc1 60%,
+      #ffe57f 80%,
+      #ff9e80 100%);
+    background-size: 400% 400%;
+    animation: rainbowShift 18s ease infinite;
+    color: #1e2350;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  @keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, #6d28d9, #2563eb, #0d9488, #ea580c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .tagline { color: #3b3f77; margin-bottom: 16px; font-size: 0.95rem; }
+  .scoreboard {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .badge {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(109,74,255,0.35);
+    border-radius: 12px;
+    padding: 8px 16px;
+    text-align: center;
+    min-width: 110px;
+    box-shadow: 0 2px 10px rgba(30,35,80,0.08);
+  }
+  .badge .num { font-size: 1.4rem; font-weight: 700; color: #6d4aff; }
+  .badge .lbl { font-size: 0.75rem; color: #3b3f77; text-transform: uppercase; letter-spacing: 1px; }
+  .panel {
+    background: rgba(255,255,255,0.62);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 760px;
+    width: 100%;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 24px rgba(30,35,80,0.12);
+    color: #1e2350;
+  }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid rgba(109,74,255,0.4);
+    background: rgba(255,255,255,0.5);
+    color: #2d2a6e;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { background: rgba(109,74,255,0.15); }
+  .tab-btn.active { background: #6d4aff; border-color: #6d4aff; color: white; }
+  h2 { font-size: 1.25rem; margin-bottom: 10px; color: #2d2a6e; }
+  p.hint { color: #3b3f77; font-size: 0.9rem; margin-bottom: 12px; }
+
+  /* Explorer */
+  .explorer-wrap { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+  canvas { border-radius: 12px; background: rgba(255,255,255,0.65); }
+  .explorer-controls { flex: 1; min-width: 240px; }
+  input[type=range] { width: 100%; accent-color: #6d4aff; margin: 8px 0 14px; }
+  .readout {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 6px 14px;
+    background: rgba(45,42,110,0.08);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 10px;
+  }
+  .readout .k { color: #3b3f77; font-size: 0.85rem; }
+  .readout .v { font-weight: 700; font-family: 'Consolas', monospace; color: #6d28d9; text-align: right; }
+  .pi-ratio { font-size: 1.5rem; font-weight: 800; color: #d97706; text-align: center; margin-top: 10px; }
+
+  /* Quiz */
+  .quiz-q { font-size: 1.15rem; margin-bottom: 14px; line-height: 1.5; }
+  .answers { display: grid; gap: 10px; }
+  .ans-btn {
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(109,74,255,0.4);
+    background: rgba(255,255,255,0.6);
+    color: #1e2350;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .ans-btn:hover:not(:disabled) { background: rgba(109,74,255,0.15); transform: translateX(4px); }
+  .ans-btn.correct { background: #16a34a; border-color: #16a34a; color: white; }
+  .ans-btn.wrong { background: #dc2626; border-color: #dc2626; color: white; }
+  .ans-btn:disabled { cursor: default; opacity: 0.85; }
+  .feedback { margin-top: 12px; min-height: 42px; font-size: 0.95rem; line-height: 1.4; }
+  .feedback.good { color: #15803d; }
+  .feedback.bad { color: #b91c1c; }
+  .next-btn {
+    margin-top: 8px;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    background: #6d4aff;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .next-btn:hover { background: #7c5cff; }
+  .progress { font-size: 0.85rem; color: #3b3f77; margin-bottom: 10px; }
+
+  /* Estimate game */
+  .est-wrap { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+  .est-controls { flex: 1; min-width: 240px; }
+  .est-input-row { display: flex; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
+  .est-input {
+    flex: 1;
+    min-width: 140px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(109,74,255,0.4);
+    background: rgba(255,255,255,0.7);
+    color: #6d28d9;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .est-result { margin-top: 12px; min-height: 50px; font-size: 0.95rem; line-height: 1.5; }
+
+  .hidden { display: none; }
+  .fact {
+    background: rgba(255,183,77,0.18);
+    border-left: 4px solid #f59e0b;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: #92400e;
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🥧 Pi Explorer</h1>
+<div class="tagline">Radius · Diameter · Circumference · π — learn by playing</div>
+
+<div class="scoreboard">
+  <div class="badge"><div class="num" id="score">0</div><div class="lbl">Score</div></div>
+  <div class="badge"><div class="num" id="streak">0</div><div class="lbl">Streak</div></div>
+  <div class="badge"><div class="num" id="best">0</div><div class="lbl">Best streak</div></div>
+</div>
+
+<div class="panel">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="explore">🔭 Explore π</button>
+    <button class="tab-btn" data-tab="quiz">🧠 Quiz Challenge</button>
+    <button class="tab-btn" data-tab="estimate">🎯 Estimation Game</button>
+  </div>
+
+  <!-- EXPLORE -->
+  <div id="tab-explore">
+    <h2>The π machine</h2>
+    <p class="hint">Drag the slider to resize the circle. Watch what happens: no matter the size, <strong>Circumference ÷ Diameter is always π ≈ 3.14159…</strong></p>
+    <div class="explorer-wrap">
+      <canvas id="cv" width="300" height="300"></canvas>
+      <div class="explorer-controls">
+        <label>Radius (r): <strong id="rLbl" style="color:#6d28d9">80 px</strong></label>
+        <input type="range" id="rSlider" min="30" max="130" value="80">
+        <div class="readout">
+          <span class="k">Radius r</span><span class="v" id="roR">80</span>
+          <span class="k">Diameter d = 2r</span><span class="v" id="roD">160</span>
+          <span class="k">Circumference C = 2πr</span><span class="v" id="roC">502.65</span>
+          <span class="k">Area A = πr²</span><span class="v" id="roA">20106.19</span>
+        </div>
+        <div class="pi-ratio">C ÷ d = <span id="roPi">3.14159</span></div>
+        <div class="fact">💡 Fun fact: π is irrational — its digits go on forever without repeating. 3.14159 is just the beginning!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="tab-quiz" class="hidden">
+    <div class="progress" id="qProgress"></div>
+    <div class="quiz-q" id="qText"></div>
+    <div class="answers" id="qAnswers"></div>
+    <div class="feedback" id="qFeedback"></div>
+    <button class="next-btn hidden" id="qNext">Next question →</button>
+  </div>
+
+  <!-- ESTIMATE -->
+  <div id="tab-estimate" class="hidden">
+    <h2>Estimate the circumference!</h2>
+    <p class="hint">A circle appears with a hidden circumference. Look at its radius, then type your estimate for <strong>C = 2 × π × r</strong>. Use 3.14 for π. Get within 5% to score!</p>
+    <div class="est-wrap">
+      <canvas id="cv2" width="300" height="300"></canvas>
+      <div class="est-controls">
+        <div class="readout">
+          <span class="k">Radius r (px)</span><span class="v" id="estR">?</span>
+        </div>
+        <div class="est-input-row">
+          <input type="number" class="est-input" id="estInput" placeholder="Your estimate…" step="any">
+          <button class="next-btn" id="estCheck">Check!</button>
+        </div>
+        <button class="next-btn hidden" id="estNew">New circle 🎲</button>
+        <div class="est-result" id="estResult"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- Tabs ----------
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(x =>
+    x.classList.toggle('active', x.dataset.tab === name));
+  ['explore','quiz','estimate'].forEach(t =>
+    document.getElementById('tab-'+t).classList.toggle('hidden', t !== name));
+}
+document.querySelectorAll('.tab-btn').forEach(b =>
+  b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+// ---------- Score ----------
+let score = 0, streak = 0, best = 0;
+function updateScore(delta) {
+  score += delta;
+  if (delta > 0) { streak++; best = Math.max(best, streak); }
+  else streak = 0;
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('best').textContent = best;
+}
+
+// ---------- Explorer ----------
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const slider = document.getElementById('rSlider');
+function drawCircle(c, cx, cy, r, showLabels) {
+  const g = c.getContext('2d');
+  g.clearRect(0, 0, c.width, c.height);
+  // circumference trace
+  g.beginPath();
+  g.arc(cx, cy, r, 0, Math.PI * 2);
+  g.strokeStyle = '#6d4aff'; g.lineWidth = 3; g.stroke();
+  // fill
+  g.fillStyle = 'rgba(109,74,255,0.12)'; g.fill();
+  // center dot
+  g.beginPath(); g.arc(cx, cy, 4, 0, Math.PI*2);
+  g.fillStyle = '#1e2350'; g.fill();
+  // radius line
+  g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + r, cy);
+  g.strokeStyle = '#059669'; g.lineWidth = 2.5; g.stroke();
+  // diameter line
+  g.beginPath(); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy);
+  g.setLineDash([6, 5]);
+  g.strokeStyle = '#db2777'; g.lineWidth = 2; g.stroke();
+  g.setLineDash([]);
+  if (showLabels) {
+    g.font = 'bold 13px Consolas, monospace';
+    g.fillStyle = '#059669';
+    g.fillText('r', cx + r/2 - 3, cy - 8);
+    g.fillStyle = '#db2777';
+    g.fillText('d', cx - 4, cy - r/2 - 6);
+    // rolling circumference line under circle
+    g.beginPath();
+    g.moveTo(cx - r, cy + r + 28);
+    g.lineTo(cx + r, cy + r + 28);
+    g.strokeStyle = '#d97706'; g.lineWidth = 3; g.stroke();
+    g.fillStyle = '#d97706';
+    g.fillText('C (unrolled)', cx - 34, cy + r + 46);
+  }
+}
+function updateExplorer() {
+  const r = +slider.value;
+  document.getElementById('rLbl').textContent = r + ' px';
+  document.getElementById('roR').textContent = r;
+  document.getElementById('roD').textContent = 2*r;
+  document.getElementById('roC').textContent = (2*Math.PI*r).toFixed(2);
+  document.getElementById('roA').textContent = (Math.PI*r*r).toFixed(2);
+  document.getElementById('roPi').textContent = ((2*Math.PI*r)/(2*r)).toFixed(5);
+  drawCircle(cv, 150, 138, r, true);
+}
+slider.addEventListener('input', updateExplorer);
+updateExplorer();
+
+// ---------- Quiz ----------
+const questions = [
+  { q: "The distance from the center of a circle to its edge is called…",
+    a: ["The radius", "The diameter", "The circumference", "The area"], correct: 0,
+    why: "The radius (r) is the distance from center to edge. The diameter (d) goes all the way across: d = 2r." },
+  { q: "How does the diameter relate to the radius?",
+    a: ["d = r", "d = 2r", "d = r/2", "d = πr"], correct: 1,
+    why: "The diameter is exactly twice the radius: d = 2r." },
+  { q: "π (pi) is defined as the ratio of…",
+    a: ["Area to radius", "Circumference to radius", "Circumference to diameter", "Diameter to circumference"], correct: 2,
+    why: "π = C ÷ d for ANY circle, no matter how big or small. That's the magic of π!" },
+  { q: "A circle has a radius of 5 cm. What is its diameter?",
+    a: ["2.5 cm", "5 cm", "10 cm", "15.7 cm"], correct: 2,
+    why: "d = 2r = 2 × 5 = 10 cm." },
+  { q: "Approximately how many diameters fit around a circle's edge?",
+    a: ["About 2", "About 3.14", "About 5", "It depends on the circle"], correct: 1,
+    why: "The circumference is about 3.14 times the diameter — that ratio is π itself." },
+  { q: "The formula for circumference is…",
+    a: ["C = πd", "C = 2πr", "Both are correct!", "Neither"], correct: 2,
+    why: "Both! Since d = 2r, we get C = πd = 2πr. Same formula, two forms." },
+  { q: "Which statement about π is TRUE?",
+    a: ["π = 22/7 exactly", "π is irrational — its digits never repeat", "π = 3.14 exactly", "π was proven to be a fraction"], correct: 1,
+    why: "π is irrational: 3.14 and 22/7 are just approximations. Its decimals go on forever without a repeating pattern." },
+  { q: "If you double a circle's radius, its circumference…",
+    a: ["Doubles", "Quadruples", "Stays the same", "Halves"], correct: 0,
+    why: "C = 2πr, so circumference scales linearly with radius. Double r → double C." },
+  { q: "If you double a circle's radius, its area…",
+    a: ["Doubles", "Quadruples", "Stays the same", "Doubles times π"], correct: 1,
+    why: "A = πr². Radius doubles → r² becomes 4× bigger → area quadruples!" },
+  { q: "A wheel has a diameter of 1 meter. Roughly how far does it travel in one full rotation?",
+    a: ["1 meter", "About 3.14 meters", "About 6.28 meters", "Half a meter"], correct: 1,
+    why: "One rotation covers one circumference: C = πd ≈ 3.14 m." },
+];
+let qi = 0;
+const qText = document.getElementById('qText'),
+      qAnswers = document.getElementById('qAnswers'),
+      qFeedback = document.getElementById('qFeedback'),
+      qNext = document.getElementById('qNext'),
+      qProgress = document.getElementById('qProgress');
+
+function showQuestion() {
+  const q = questions[qi];
+  qProgress.textContent = `Question ${qi+1} of ${questions.length}`;
+  qText.innerHTML = q.q;
+  qFeedback.textContent = '';
+  qFeedback.className = 'feedback';
+  qNext.classList.add('hidden');
+  qAnswers.innerHTML = '';
+  const order = q.a.map((t, i) => ({ t, i })).sort(() => Math.random() - 0.5);
+  order.forEach(({ t, i }) => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = t;
+    btn.onclick = () => {
+      [...qAnswers.children].forEach(b => b.disabled = true);
+      if (i === q.correct) {
+        btn.classList.add('correct');
+        qFeedback.innerHTML = '✅ <strong>Correct!</strong> ' + q.why;
+        qFeedback.className = 'feedback good';
+        updateScore(10);
+      } else {
+        btn.classList.add('wrong');
+        qAnswers.children[[...order.keys()].find(k => order[k].i === q.correct)].classList.add('correct');
+        qFeedback.innerHTML = '❌ <strong>Not quite.</strong> ' + q.why;
+        qFeedback.className = 'feedback bad';
+        updateScore(0);
+      }
+      qNext.classList.remove('hidden');
+    };
+    qAnswers.appendChild(btn);
+  });
+}
+
+function advanceQuiz() {
+  qi++;
+  if (qi >= questions.length) {
+    // Quiz finished
+    qProgress.textContent = 'Done!';
+    qText.innerHTML = `🎉 Quiz complete! You scored <strong>${score} points</strong> with a best streak of <strong>${best}</strong>.`;
+    qAnswers.innerHTML = '';
+    qFeedback.textContent = '';
+    qNext.textContent = 'Go';
+    qNext.onclick = () => {
+      // reset quiz progress, keep total score
+      qi = 0;
+      qNext.textContent = 'Next question →';
+      qNext.onclick = advanceQuiz;
+      showQuestion();
+      // return to Explore π
+      switchTab('explore');
+    };
+  } else {
+    showQuestion();
+  }
+}
+qNext.onclick = advanceQuiz;
+showQuestion();
+
+// ---------- Estimation game ----------
+const cv2 = document.getElementById('cv2');
+let estR = 0, attempts = 0, hits = 0;
+function newCircle() {
+  estR = Math.floor(Math.random() * 90) + 40;
+  document.getElementById('estR').textContent = estR;
+  drawCircle(cv2, 150, 150, estR, false);
+  document.getElementById('estResult').textContent = '';
+  document.getElementById('estResult').className = 'est-result';
+  document.getElementById('estInput').value = '';
+  document.getElementById('estInput').focus();
+}
+document.getElementById('estCheck').onclick = () => {
+  const val = parseFloat(document.getElementById('estInput').value);
+  const res = document.getElementById('estResult');
+  if (isNaN(val) || val <= 0) {
+    res.innerHTML = '⚠️ Enter a positive number first!';
+    return;
+  }
+  const trueC = 2 * Math.PI * estR;
+  const err = Math.abs(val - trueC) / trueC;
+  attempts++;
+  if (err <= 0.05) {
+    hits++;
+    updateScore(15);
+    res.innerHTML = `🎉 <strong>Excellent!</strong> The true circumference is <strong>${trueC.toFixed(2)}</strong> px (C = 2πr = 2π×${estR}). You were within ${(err*100).toFixed(1)}%!<br><small>2 × 3.14 × ${estR} = ${(6.28*estR).toFixed(2)} — close enough with 3.14.</small>`;
+    res.style.color = '#15803d';
+  } else if (err <= 0.15) {
+    updateScore(5);
+    res.innerHTML = `👍 <strong>Close!</strong> True answer: <strong>${trueC.toFixed(2)}</strong> px. You were off by ${(err*100).toFixed(1)}%. Remember: multiply the diameter (2r = ${2*estR}) by 3.14.`;
+    res.style.color = '#92400e';
+  } else {
+    updateScore(0);
+    res.innerHTML = `❌ True answer: <strong>${trueC.toFixed(2)}</strong> px. Tip: first double the radius (d = ${2*estR}), then multiply by 3.14 → ${(2*estR*3.14).toFixed(1)}.`;
+    res.style.color = '#b91c1c';
+  }
+  document.getElementById('estNew').classList.remove('hidden');
+};
+document.getElementById('estNew').onclick = newCircle;
+newCircle();
+</script>
+</body>
+</html>
