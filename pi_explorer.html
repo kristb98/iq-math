@@ -256,6 +256,28 @@ function updateScore(delta) {
   document.getElementById('score').textContent = score;
   document.getElementById('streak').textContent = streak;
   document.getElementById('best').textContent = best;
+  saveState();
+}
+
+// ---------- Auto-save (Gmail-style drafts) ----------
+const PI_EXPLORER_KEY = 'piExplorerProgress';
+function saveState(nextQi) {
+  try {
+    localStorage.setItem(PI_EXPLORER_KEY, JSON.stringify({
+      score: score,
+      streak: streak,
+      best: best,
+      qi: typeof nextQi === 'number' ? nextQi : qi,
+      estR: estR
+    }));
+  } catch (e) { /* private browsing mode: saving is best-effort */ }
+}
+function readSavedState() {
+  try {
+    return JSON.parse(localStorage.getItem(PI_EXPLORER_KEY) || 'null');
+  } catch (e) {
+    return null;
+  }
 }
 
 // ---------- Explorer ----------
@@ -377,6 +399,8 @@ function showQuestion() {
         updateScore(0);
       }
       qNext.classList.remove('hidden');
+      // Auto-save: resume at the NEXT (unanswered) question after leaving.
+      saveState(qi + 1);
     };
     qAnswers.appendChild(btn);
   });
@@ -384,8 +408,9 @@ function showQuestion() {
 
 function advanceQuiz() {
   qi++;
+  saveState();
   if (qi >= questions.length) {
-    // Quiz finished
+    // Quiz finished — a fresh visit starts the quiz over (points are kept).
     qProgress.textContent = 'Done!';
     qText.innerHTML = `🎉 Quiz complete! You scored <strong>${score} points</strong> with a best streak of <strong>${best}</strong>.`;
     qAnswers.innerHTML = '';
@@ -397,6 +422,7 @@ function advanceQuiz() {
       qNext.textContent = 'Next question →';
       qNext.onclick = advanceQuiz;
       showQuestion();
+      saveState();
       // return to Explore π
       switchTab('explore');
     };
@@ -404,6 +430,20 @@ function advanceQuiz() {
     showQuestion();
   }
 }
+// Auto-save: restore points, streak and quiz position if a draft exists.
+(function restoreProgress() {
+  const saved = readSavedState();
+  if (!saved) return;
+  if (typeof saved.score === 'number') score = saved.score;
+  if (typeof saved.streak === 'number') streak = saved.streak;
+  if (typeof saved.best === 'number') best = saved.best;
+  document.getElementById('score').textContent = score;
+  document.getElementById('streak').textContent = streak;
+  document.getElementById('best').textContent = best;
+  if (typeof saved.qi === 'number' && saved.qi > 0 && saved.qi < questions.length) {
+    qi = saved.qi;
+  }
+})();
 qNext.onclick = advanceQuiz;
 showQuestion();
 
@@ -418,6 +458,7 @@ function newCircle() {
   document.getElementById('estResult').className = 'est-result';
   document.getElementById('estInput').value = '';
   document.getElementById('estInput').focus();
+  saveState();
 }
 document.getElementById('estCheck').onclick = () => {
   const val = parseFloat(document.getElementById('estInput').value);
@@ -446,7 +487,20 @@ document.getElementById('estCheck').onclick = () => {
   document.getElementById('estNew').classList.remove('hidden');
 };
 document.getElementById('estNew').onclick = newCircle;
-newCircle();
+// Auto-save: bring back the same circle, or start a fresh one.
+(function restoreEstimateCircle() {
+  const saved = readSavedState();
+  if (saved && typeof saved.estR === 'number' && saved.estR >= 40 && saved.estR <= 129) {
+    estR = saved.estR;
+    document.getElementById('estR').textContent = estR;
+    drawCircle(cv2, 150, 150, estR, false);
+    document.getElementById('estResult').textContent = '';
+    document.getElementById('estResult').className = 'est-result';
+    document.getElementById('estInput').value = '';
+  } else {
+    newCircle();
+  }
+})();
 </script>
 </body>
 </html>
