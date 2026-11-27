@@ -1910,8 +1910,8 @@ const TEST_QUESTION_GENERATORS = [
     () => {
         const options = [
             { question: 'In E = mc², what is the exponent on c?', answer: 2 },
-            { question: 'For m = 2 kg, E ≈ 18 × 10¹⁶ J. What is the coefficient?', answer: 18 },
-            { question: 'For m = 5 kg, E ≈ 45 × 10¹⁶ J. What is the coefficient?', answer: 45 }
+            { question: 'E = what?', answer: 'mc²', choices: shuffleQuestions(['mc²', 'm²c', '2mc', 'm + c²']) },
+            { question: 'E = what? (m is mass, c is the speed of light)', answer: 'mc²', choices: shuffleQuestions(['mc²', 'cm²', 'c² + m', 'm ÷ c²']) }
         ];
         return randChoice(options);
     },
@@ -2018,23 +2018,46 @@ function initMixedTest() {
     const percentageEl = container.querySelector('.test-percentage');
     const restartBtn = container.querySelector('.test-restart');
     const historyListEl = container.querySelector('.test-history-list');
+    const choicesEl = container.querySelector('.test-choices');
 
     let questions = [];
     let index = 0;
     let score = 0;
 
     function showQuestion() {
-        questionEl.innerHTML = questions[index].question;
+        const current = questions[index];
+        questionEl.innerHTML = current.question;
         progressEl.textContent = `Question ${index + 1} / ${questions.length}`;
         scoreEl.textContent = `Correct: ${score}`;
-        inputEl.value = '';
-        inputEl.disabled = false;
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Answer';
-        nextBtn.style.display = 'none';
         feedbackEl.textContent = '';
         feedbackEl.className = 'test-feedback';
-        inputEl.focus();
+        nextBtn.style.display = 'none';
+
+        if (current.choices && choicesEl) {
+            // Multiple-choice question: show buttons, hide the text input.
+            inputEl.style.display = 'none';
+            submitBtn.style.display = 'none';
+            choicesEl.innerHTML = '';
+            current.choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'test-choice';
+                btn.textContent = choice;
+                btn.addEventListener('click', () => checkChoice(btn, current));
+                choicesEl.appendChild(btn);
+            });
+            choicesEl.style.display = 'grid';
+        } else {
+            // Regular numeric question.
+            if (choicesEl) choicesEl.style.display = 'none';
+            inputEl.style.display = '';
+            submitBtn.style.display = '';
+            inputEl.value = '';
+            inputEl.disabled = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Answer';
+            inputEl.focus();
+        }
     }
 
     function startTest() {
@@ -2046,17 +2069,8 @@ function initMixedTest() {
         showQuestion();
     }
 
-    function check() {
-        const value = parseFloat(inputEl.value);
-        if (isNaN(value)) {
-            feedbackEl.textContent = 'Enter a number to answer.';
-            feedbackEl.className = 'test-feedback wrong';
-            return;
-        }
-
-        const current = questions[index];
-        const tolerance = current.tolerance || 0;
-        if (Math.abs(value - current.answer) <= tolerance) {
+    function finishAnswer(wasCorrect) {
+        if (wasCorrect) {
             score++;
             feedbackEl.textContent = '✅ Correct';
             feedbackEl.className = 'test-feedback correct';
@@ -2088,6 +2102,27 @@ function initMixedTest() {
             nextBtn.style.display = 'inline-block';
             submitBtn.textContent = 'Answered';
         }
+    }
+
+    function checkChoice(btn, current) {
+        if (btn.disabled) return;
+        choicesEl.querySelectorAll('button').forEach(b => b.disabled = true);
+        const isCorrect = btn.textContent === current.answer;
+        btn.classList.add(isCorrect ? 'correct' : 'wrong');
+        finishAnswer(isCorrect);
+    }
+
+    function check() {
+        const value = parseFloat(inputEl.value);
+        if (isNaN(value)) {
+            feedbackEl.textContent = 'Enter a number to answer.';
+            feedbackEl.className = 'test-feedback wrong';
+            return;
+        }
+
+        const current = questions[index];
+        const tolerance = current.tolerance || 0;
+        finishAnswer(Math.abs(value - current.answer) <= tolerance);
     }
 
     submitBtn.addEventListener('click', check);
