@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finding Numbers — Solving for x: Simple Equations</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --purple: #6d4aff;
+    --purple-dark: #5636cc;
+    --purple-light: #f0ecff;
+    --bg: #faf9ff;
+    --text: #2a2350;
+    --green: #1fa971;
+    --red: #e04b4b;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 60px;
+  }
+
+  .top-bar {
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    padding: 12px 20px;
+    text-align: center;
+  }
+  .top-bar a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .top-bar a:hover { text-decoration: underline; }
+
+  header {
+    background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+    color: #fff;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  header h1 { font-size: 1.9rem; margin-bottom: 8px; }
+  header p { opacity: .9; max-width: 660px; margin: 0 auto; }
+
+  main { max-width: 800px; margin: 0 auto; padding: 24px 20px; }
+
+  section {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    margin-top: 24px;
+    box-shadow: 0 2px 10px rgba(109, 74, 255, .08);
+  }
+
+  h2 {
+    color: var(--purple);
+    font-size: 1.35rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badge {
+    background: var(--purple-light);
+    color: var(--purple);
+    font-size: .75rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+
+  p.intro { margin-bottom: 14px; color: #555; }
+
+  .big-example {
+    background: var(--purple-light);
+    border-left: 4px solid var(--purple);
+    padding: 14px 16px;
+    border-radius: 0 10px 10px 0;
+    margin: 14px 0;
+    font-size: 1.08rem;
+  }
+
+  .step {
+    display: block;
+    margin: 4px 0;
+  }
+  .step .why {
+    color: #7a6fae;
+    font-size: .9rem;
+    margin-left: 10px;
+  }
+
+  .tip {
+    background: #fff8e6;
+    border-left: 4px solid #f0b429;
+    padding: 12px 16px;
+    border-radius: 0 10px 10px 0;
+    margin-top: 14px;
+    font-size: .95rem;
+  }
+
+  sup { color: var(--purple); font-weight: 700; }
+  .x-solved {
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  /* Balance visual */
+  .balance {
+    text-align: center;
+    margin: 18px 0;
+  }
+  .balance .scale {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: var(--purple-light);
+    display: inline-block;
+    padding: 12px 26px;
+    border-radius: 12px;
+  }
+  .balance .arrow { font-size: 1.3rem; color: #999; margin: 6px 0; }
+
+  /* Practice generator */
+  .practice {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+    text-align: center;
+  }
+  .equation-display {
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--purple-light);
+    padding: 16px 34px;
+    border-radius: 14px;
+    min-width: 220px;
+  }
+  .controls { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 10px;
+    background: var(--purple);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .btn:hover { background: var(--purple-dark); }
+  .btn.secondary { background: #fff; color: var(--purple); border: 2px solid var(--purple); }
+  .btn.secondary:hover { background: var(--purple-light); }
+
+  .reveal {
+    font-size: 1.1rem;
+    min-height: 34px;
+    color: #555;
+  }
+  .reveal.show { color: var(--green); font-weight: 700; }
+
+  /* Quiz */
+  .quiz-q {
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid #ece8fa;
+    border-radius: 10px;
+  }
+  .quiz-q .q { font-weight: 600; margin-bottom: 10px; font-size: 1.05rem; }
+  .answers { display: flex; flex-wrap: wrap; gap: 10px; }
+  .answers button {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 2px solid #ddd5f5;
+    background: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all .15s;
+  }
+  .answers button:hover { border-color: var(--purple); transform: translateY(-1px); }
+  .answers button.correct { background: var(--green); border-color: var(--green); color: #fff; }
+  .answers button.wrong { background: var(--red); border-color: var(--red); color: #fff; }
+  .feedback { margin-top: 8px; font-size: .92rem; min-height: 20px; }
+  .feedback.ok { color: var(--green); font-weight: 600; }
+  .feedback.no { color: var(--red); font-weight: 600; }
+
+  #score {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-top: 10px;
+    color: var(--purple);
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="index.html">IQ Math</a> · <a href="index.html">← Back to Home</a>
+</div>
+
+<header>
+  <h1>Finding Numbers: Solving for x</h1>
+  <p>Learn how to find the value of x in equations like <strong>x + 5 = 7</strong> — and level up to squares and cubes like <strong>x&#178; = 25</strong>.</p>
+</header>
+
+<main>
+
+  <!-- SECTION 1: The big idea -->
+  <section>
+    <h2>1. The Big Idea: Keep It Balanced <span class="badge">core concept</span></h2>
+    <p class="intro">An equation is like a <strong>balance scale</strong>. Both sides are equal. Whatever you do to one side, you must do to the other — that keeps it balanced and keeps x findable.</p>
+
+    <div class="balance">
+      <div class="scale">x + 5 = 7</div>
+      <div class="arrow">&#8595; subtract 5 from BOTH sides &#8595;</div>
+      <div class="scale">x = 2 &nbsp; &#10003;</div>
+    </div>
+
+    <div class="big-example">
+      <span class="step"><strong>x + 5 = 7</strong></span>
+      <span class="step">x + 5 &minus; 5 = 7 &minus; 5 <span class="why">&larr; do the same to both sides</span></span>
+      <span class="step"><span class="x-solved">x = 2</span> &nbsp;<span class="why">check: 2 + 5 = 7 &#10003;</span></span>
+    </div>
+
+    <div class="tip">&#128161; <strong>Goal:</strong> get x <em>alone</em> on one side. Undo whatever is stuck to it by doing the <strong>opposite operation</strong>: addition is undone by subtraction, subtraction by addition.</div>
+  </section>
+
+  <!-- SECTION 2: Addition & subtraction -->
+  <section>
+    <h2>2. Equations with + and &minus; <span class="badge">examples</span></h2>
+
+    <div class="big-example">
+      <span class="step"><strong>x &minus; 3 = 4</strong></span>
+      <span class="step">x &minus; 3 + 3 = 4 + 3 <span class="why">&larr; add 3 to both sides</span></span>
+      <span class="step"><span class="x-solved">x = 7</span> &nbsp;<span class="why">check: 7 &minus; 3 = 4 &#10003;</span></span>
+    </div>
+
+    <div class="big-example">
+      <span class="step"><strong>x + 12 = 20</strong></span>
+      <span class="step">x + 12 &minus; 12 = 20 &minus; 12 <span class="why">&larr; subtract 12 from both sides</span></span>
+      <span class="step"><span class="x-solved">x = 8</span> &nbsp;<span class="why">check: 8 + 12 = 20 &#10003;</span></span>
+    </div>
+
+    <div class="big-example">
+      <span class="step"><strong>x &minus; 15 = 5</strong></span>
+      <span class="step">x &minus; 15 + 15 = 5 + 15 <span class="why">&larr; add 15 to both sides</span></span>
+      <span class="step"><span class="x-solved">x = 20</span> &nbsp;<span class="why">check: 20 &minus; 15 = 5 &#10003;</span></span>
+    </div>
+
+    <div class="tip">&#9888;&#65039; <strong>Common mistake:</strong> only fixing one side. If you write x = 7 &minus; 5 for the first example, you get the right answer here by luck — but the habit breaks harder problems later. Always change <em>both</em> sides.</div>
+  </section>
+
+  <!-- SECTION 3: Squares and cubes -->
+  <section>
+    <h2>3. Level Up: x&#178; and x&#179; <span class="badge">powers</span></h2>
+    <p class="intro">When x is squared or cubed, undo it with the <strong>opposite power move</strong>: square root for x&#178;, cube root for x&#179;.</p>
+
+    <div class="big-example">
+      <span class="step"><strong>x&#178; = 25</strong></span>
+      <span class="step">x = &radic;25 = 5 <span class="why">&larr; what times itself gives 25?</span></span>
+      <span class="step">Check: 5 &times; 5 = 25 &#10003;</span>
+    </div>
+
+    <div class="big-example">
+      <span class="step"><strong>x&#179; = 8</strong></span>
+      <span class="step">x = &#8731;8 = 2 <span class="why">&larr; what times itself twice gives 8?</span></span>
+      <span class="step">Check: 2 &times; 2 &times; 2 = 8 &#10003;</span>
+    </div>
+
+    <div class="big-example">
+      <span class="step"><strong>x&#178; &minus; 6 = 10</strong> &nbsp;<span class="why">two steps: undo &minus;6 first, then the square</span></span>
+      <span class="step">x&#178; = 16 <span class="why">&larr; add 6 to both sides</span></span>
+      <span class="step"><span class="x-solved">x = 4</span> &nbsp;<span class="why">check: 16 &minus; 6 = 10 &#10003;</span></span>
+    </div>
+
+    <div class="tip">&#9888;&#65039; <strong>Note:</strong> x&#178; = 25 has <em>two</em> answers: x = 5 <strong>or</strong> x = &minus;5, because (&minus;5) &times; (&minus;5) = 25 too. Cubes don't: (&minus;2)&#179; = &minus;8, not +8.</div>
+  </section>
+
+  <!-- SECTION 4: Random equation generator -->
+  <section>
+    <h2>4. Practice Machine <span class="badge">interactive</span></h2>
+    <p class="intro">Tap "New equation" for a random one, think of the answer, then tap "Show answer" to check. Solve it in your head before revealing!</p>
+
+    <div class="practice">
+      <div class="equation-display" id="eqDisplay">x + 5 = 7</div>
+      <div class="reveal" id="revealBox">Try to solve it first! &#129300;</div>
+      <div class="controls">
+        <button class="btn" id="newBtn">New equation</button>
+        <button class="btn secondary" id="showBtn">Show answer</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: Quiz -->
+  <section>
+    <h2>5. Quick Quiz <span class="badge">test yourself</span></h2>
+    <p class="intro">Click the value of x for each equation.</p>
+
+    <div class="quiz-q" data-answer="2">
+      <div class="q">Q1. x + 5 = 7 &nbsp;&rarr;&nbsp; x = ?</div>
+      <div class="answers">
+        <button data-i="0">x = 12</button>
+        <button data-i="1">x = 3</button>
+        <button data-i="2">x = 2</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <div class="q">Q2. x &minus; 3 = 4 &nbsp;&rarr;&nbsp; x = ?</div>
+      <div class="answers">
+        <button data-i="0">x = 7</button>
+        <button data-i="1">x = 1</button>
+        <button data-i="2">x = 12</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz-q" data-answer="1">
+      <div class="q">Q3. x + 9 = 15 &nbsp;&rarr;&nbsp; x = ?</div>
+      <div class="answers">
+        <button data-i="0">x = 24</button>
+        <button data-i="1">x = 6</button>
+        <button data-i="2">x = 5</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz-q" data-answer="2">
+      <div class="q">Q4. x&#178; = 36 &nbsp;&rarr;&nbsp; x = ?</div>
+      <div class="answers">
+        <button data-i="0">x = 18</button>
+        <button data-i="1">x = 6</button>
+        <button data-i="2">x = 6 or x = &minus;6</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz-q" data-answer="1">
+      <div class="q">Q5. x&#179; = 27 &nbsp;&rarr;&nbsp; x = ?</div>
+      <div class="answers">
+        <button data-i="0">x = 9</button>
+        <button data-i="1">x = 3</button>
+        <button data-i="2">x = 24</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div class="quiz-q" data-answer="0">
+      <div class="q">Q6. x&#178; &minus; 5 = 20 &nbsp;&rarr;&nbsp; x = ?</div>
+      <div class="answers">
+        <button data-i="0">x = 5</button>
+        <button data-i="1">x = 15</button>
+        <button data-i="2">x = 7</button>
+      </div>
+      <div class="feedback"></div>
+    </div>
+
+    <div id="score">Score: 0 / 6</div>
+  </section>
+
+</main>
+
+<script>
+  // ---------- Practice machine ----------
+  const eqDisplay = document.getElementById('eqDisplay');
+  const revealBox = document.getElementById('revealBox');
+
+  const supChars = { 2: '\u00B2', 3: '\u00B3' };
+
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function newEquation() {
+    // type 0: x + a = b | type 1: x - a = b | type 2: x^2 = k | type 3: x^3 = k
+    const type = randInt(0, 3);
+    let text, answer;
+
+    if (type === 0) {
+      const a = randInt(1, 20);
+      answer = randInt(1, 20);
+      text = 'x + ' + a + ' = ' + (a + answer);
+    } else if (type === 1) {
+      const a = randInt(1, 20);
+      answer = randInt(a + 1, a + 20); // keep result positive
+      text = 'x \u2212 ' + a + ' = ' + (answer - a);
+    } else if (type === 2) {
+      const root = randInt(2, 12);
+      answer = root;
+      text = 'x' + supChars[2] + ' = ' + (root * root);
+    } else {
+      const root = randInt(2, 6);
+      answer = root;
+      text = 'x' + supChars[3] + ' = ' + (root * root * root);
+    }
+
+    eqDisplay.textContent = text;
+    revealBox.textContent = 'Answer: x = ' + answer;
+    revealBox.classList.remove('show');
+    revealBox.textContent = 'Try to solve it first! \u{1F9E0}';
+    revealBox.dataset.answer = answer;
+  }
+
+  document.getElementById('newBtn').addEventListener('click', newEquation);
+  document.getElementById('showBtn').addEventListener('click', function() {
+    revealBox.textContent = 'Answer: x = ' + revealBox.dataset.answer + ' \u2713';
+    revealBox.classList.add('show');
+  });
+
+  newEquation();
+
+  // ---------- Quiz ----------
+  let score = 0;
+  const answered = new Set();
+  const totalQs = document.querySelectorAll('.quiz-q').length;
+  const scoreEl = document.getElementById('score');
+
+  document.querySelectorAll('.quiz-q').forEach(function(q) {
+    const correct = +q.dataset.answer;
+    const fb = q.querySelector('.feedback');
+    q.querySelectorAll('.answers button').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (answered.has(q)) return;
+        answered.add(q);
+        const chosen = +btn.dataset.i;
+        if (chosen === correct) {
+          btn.classList.add('correct');
+          fb.textContent = '\u2705 Correct!';
+          fb.className = 'feedback ok';
+          score++;
+        } else {
+          btn.classList.add('wrong');
+          q.querySelectorAll('.answers button')[correct].classList.add('correct');
+          fb.textContent = '\u274C Not quite \u2014 the green answer is right.';
+          fb.className = 'feedback no';
+        }
+        scoreEl.textContent = 'Score: ' + score + ' / ' + totalQs;
+      });
+    });
+  });
+</script>
+</body>
+</html>

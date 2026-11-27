@@ -1997,6 +1997,17 @@ const TEST_QUESTION_GENERATORS = [
             { question: 'How many cubic cells does a tesseract have?', answer: 8 }
         ];
         return randChoice(facts);
+    },
+    // 11. Finding numbers (solve for x)
+    () => {
+        const options = [
+            { question: 'If x + 5 = 7, what is x?', answer: 2 },
+            { question: 'If x − 3 = 4, what is x?', answer: 7 },
+            { question: 'If x + 9 = 15, what is x?', answer: 6 },
+            { question: 'If x² = 36, what is the positive value of x?', answer: 6 },
+            { question: 'If x³ = 27, what is x?', answer: 3 }
+        ];
+        return randChoice(options);
     }
 ];
 
